@@ -25,11 +25,9 @@ namespace UserStorage.Tests
         [ExpectedException(typeof(OverflowException))]
         public void GenerateNewId_IsOverflow_ReturnAnException()
         {
+
             var generator = new CustomIdGenerator();
-            for (int i = 0; i < int.MaxValue; i++)
-            {
-                generator.GenerateNewId();
-            }
+            generator.GenerateNewId(Int32.MaxValue);
         }
     }
 }

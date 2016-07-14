@@ -4,12 +4,36 @@ using System.Configuration;
 using UserStorage;
 using UserStorage.Entities;
 using UserStorage.Interfacies;
+using System.Configuration;
+using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
 
 namespace TestConsoleApplication
 {
     public class Program
     {
         public static void Main(string[] args)
+        {
+            int currentId = int.Parse(ConfigurationManager.AppSettings.Get("CurrentId"));
+            string path = ConfigurationManager.AppSettings.Get("FilePath");
+            Console.WriteLine(currentId);
+            Console.WriteLine(path);
+            currentId = 13;
+            path = "file2.xml";
+
+            Console.WriteLine("----------------");
+            WriteInConfig(currentId, path);
+            currentId = int.Parse(ConfigurationManager.AppSettings.Get("CurrentId"));
+            path = ConfigurationManager.AppSettings.Get("FilePath");
+            Console.WriteLine(currentId);
+            Console.WriteLine(path);
+            //TestCustomConfig();
+            //TestStorage();
+            Console.ReadKey();
+        }
+
+        static void TestCustomConfig()
         {
             StartupFoldersConfigSection section = (StartupFoldersConfigSection)ConfigurationManager.GetSection("StartupFolders");
 
@@ -18,9 +42,6 @@ namespace TestConsoleApplication
                 System.Diagnostics.Debug.WriteLine(section.FolderItems[0].FolderType);
                 System.Diagnostics.Debug.WriteLine(section.FolderItems[0].Path);
             }
-            //TestStorage();
-
-            Console.ReadKey();
         }
 
         static void TestStorage()
@@ -45,6 +66,39 @@ namespace TestConsoleApplication
             }
             catch (ApplicationException e)
             {
+            }
+        }
+
+        static void WriteInConfig(int currentId, string filePath)
+        {
+            if (!ConfigurationManager.AppSettings.AllKeys.Contains("CurrentId"))
+            {
+                // открываем текущий конфиг специальным обьектом
+                System.Configuration.Configuration currentConfig =
+                    ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                // добавляем позицию в раздел AppSettings
+                currentConfig.AppSettings.Settings.Add("CurrentId", currentId.ToString());
+                //сохраняем
+                currentConfig.Save(ConfigurationSaveMode.Full);
+                //принудительно перезагружаем соотвествующую секцию
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+            else if (!ConfigurationManager.AppSettings.AllKeys.Contains("FilePath"))
+            {
+                System.Configuration.Configuration currentConfig =
+                    ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                currentConfig.AppSettings.Settings.Add("FilePath", filePath);
+                currentConfig.Save(ConfigurationSaveMode.Full);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+            else
+            {
+                System.Configuration.Configuration currentConfig =
+                    ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                currentConfig.AppSettings.Settings["CurrentId"].Value = currentId.ToString();
+                currentConfig.AppSettings.Settings["FilePath"].Value = filePath;
+                currentConfig.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
             }
         }
     }

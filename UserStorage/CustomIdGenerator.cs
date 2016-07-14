@@ -39,11 +39,24 @@ namespace UserStorage
 
     public class Sequence : IEnumerator<int>
     {
-        public int Current { get; set; }
+        private int current;
+        public int Current
+        {
+            get { return current; }
+            set
+            {
+                if (this.IsPrime(value))
+                    current = value;
+                else
+                {
+                    this.MoveNext();
+                }
+            }
+        }
 
         public Sequence()
         {
-            Current = 1;
+            current = 1;
         }
 
         public void Dispose()
@@ -58,7 +71,7 @@ namespace UserStorage
                 {
                     checked
                     {
-                        Current++;
+                        current++;
                     }
                 }
                 catch (OverflowException ex)
@@ -66,18 +79,18 @@ namespace UserStorage
                     //this.Reset();
                     throw new OverflowException("", ex);
                 }
-            } while (!IsSimple(Current));
+            } while (!IsPrime(Current));
             return true;
         }
 
         public void Reset()
         {
-            Current = 1;
+            current = 1;
         }
 
         object IEnumerator.Current => Current;
 
-        private bool IsSimple(int value)
+        private bool IsPrime(int value)
         {
             if (value < 1)
             {
