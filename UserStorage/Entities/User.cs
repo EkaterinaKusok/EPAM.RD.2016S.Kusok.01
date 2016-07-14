@@ -6,20 +6,23 @@ using System.Threading.Tasks;
 
 namespace UserStorage.Entities
 {
+    [Serializable]
     public class User
     { 
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public int PersonalId { get; set; } //PassportNumber
         public DateTime DateOfBirth { get; set; }
         public Gender Gender { get; set; }
         public VisaRecord[] VisaRecords { get; set; }
 
-        public User(int id, string firstName, string lastName, DateTime dateOfBirth, Gender gender, VisaRecord[] visaRecords)
+        public User(string firstName, string lastName, int personalId, DateTime dateOfBirth, Gender gender, VisaRecord[] visaRecords)
         {
-            this.Id = id;
+            Id = 0;
             FirstName = firstName;
             LastName = lastName;
+            PersonalId = personalId;
             DateOfBirth = dateOfBirth;
             Gender = gender;
             VisaRecords = visaRecords;

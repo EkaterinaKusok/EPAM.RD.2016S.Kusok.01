@@ -4,15 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{CFCA53C6-264D-4E8D-9A6A-CE40CC3213C4}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{6041B3B4-B6AE-479E-8B5A-E024F8BF546C}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UserStorage</RootNamespace>
-    <AssemblyName>UserStorage</AssemblyName>
+    <RootNamespace>TestConsoleApplication</RootNamespace>
+    <AssemblyName>TestConsoleApplication</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -31,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -40,19 +44,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomIdGenerator.cs" />
-    <Compile Include="Entities\Gender.cs" />
-    <Compile Include="Entities\User.cs" />
-    <Compile Include="Entities\VisaRecord.cs" />
-    <Compile Include="Interfacies\IGenerator.cs" />
-    <Compile Include="Interfacies\IRepository.cs" />
-    <Compile Include="Interfacies\IUserStorage.cs" />
-    <Compile Include="Interfacies\IValidator.cs" />
+    <Compile Include="ConfigClasses.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserStorageInMemory.cs" />
-    <Compile Include="CustomValidator.cs" />
-    <Compile Include="ValidationExeption.cs" />
-    <Compile Include="XmlRepository.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UserStorage\UserStorage.csproj">
+      <Project>{cfca53c6-264d-4e8d-9a6a-ce40cc3213c4}</Project>
+      <Name>UserStorage</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

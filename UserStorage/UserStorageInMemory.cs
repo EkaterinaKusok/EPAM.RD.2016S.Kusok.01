@@ -18,7 +18,6 @@ namespace UserStorage
             users = new List<User>();
         }
 
-        
         public int Add(User user)
         {
             if (!validator.Validate(user))
@@ -50,14 +49,7 @@ namespace UserStorage
             users.RemoveAll(u => u.Id == user.Id);
             users.RemoveAll(x => x.Equals(user));
         }
-
-        //public IEnumerable<int> SearchForUser(Func<User, bool> predicate)
-        //{
-        //    if (!users.Any())
-        //        return new int[0];
-        //    return users.Where(predicate).Select(u => u.Id);
-        //}
-
+        
         public IEnumerable<int> SearchForUser(params Func<User, bool>[] predicates)
         {
             if (!users.Any())
@@ -71,7 +63,30 @@ namespace UserStorage
             return users.Where(commonPredicate).Select(u => u.Id);
         }
 
-        
+        public IEnumerable<int> AddUsers(IEnumerable<User> newUsers)
+        {
+            var userIds = new List<int>();
+            foreach (var user in newUsers)
+            {
+                userIds.Add(this.Add(user));
+            }
+            return userIds;
+        }
+
+        public IEnumerable<User> GetAllUsers()
+        {
+            return users.Select(u => u);
+        }
+
+        public void DeleteAllUsers()
+        {
+            users.Clear();
+        }
+
+        public void SetCurrentId(int currentId)
+        {
+            idGenerator.SetCurrentId(currentId);
+        }
     }
 }
 

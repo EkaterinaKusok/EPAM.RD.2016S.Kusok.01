@@ -15,15 +15,35 @@ namespace UserStorage
             sequence.MoveNext();
             return result;
         }
+
+        public int GenerateNewId(int prev)
+        {
+            sequence.Current = prev;
+            sequence.MoveNext();
+            int result = sequence.Current;
+            sequence.MoveNext();
+            return result;
+        }
+
+        public bool SetCurrentId(int currentId)
+        {
+            sequence.Current = currentId;
+            return true;
+        }
+
+        public int GetCurrentId()
+        {
+            return sequence.Current;
+        }
     }
 
     public class Sequence : IEnumerator<int>
     {
-        public int Current { get; private set; }
+        public int Current { get; set; }
 
         public Sequence()
         {
-            Current = 0;
+            Current = 1;
         }
 
         public void Dispose()
@@ -52,7 +72,7 @@ namespace UserStorage
 
         public void Reset()
         {
-            Current = 0;
+            Current = 1;
         }
 
         object IEnumerator.Current => Current;
