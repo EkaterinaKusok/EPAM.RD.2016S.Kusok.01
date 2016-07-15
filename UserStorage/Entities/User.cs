@@ -12,12 +12,12 @@ namespace UserStorage.Entities
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public int PersonalId { get; set; } //PassportNumber
+        public string PersonalId { get; set; } //PassportNumber
         public DateTime DateOfBirth { get; set; }
         public Gender Gender { get; set; }
         public VisaRecord[] VisaRecords { get; set; }
 
-        public User(string firstName, string lastName, int personalId, DateTime dateOfBirth, Gender gender, VisaRecord[] visaRecords)
+        public User(string firstName, string lastName, string personalId, DateTime dateOfBirth, Gender gender, VisaRecord[] visaRecords)
         {
             Id = 0;
             FirstName = firstName;

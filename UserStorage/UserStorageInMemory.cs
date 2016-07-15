@@ -11,18 +11,47 @@ namespace UserStorage
         private List<User> users;
 
         private readonly IGenerator<int> idGenerator = new CustomIdGenerator();
-        private readonly IValidator validator = new CustomValidator();
 
-        public UserStorageInMemory()
+        public UserStorageInMemory(IGenerator<int> generator)
         {
+            if (generator != null)
+                this.idGenerator = generator;
             users = new List<User>();
         }
 
-        public int Add(User user)
+        public int Add(User user, IUserValidator validator = null)
         {
-            if (!validator.Validate(user))
+            if (validator != null)
             {
-                throw new ValidationException();
+                string exceptionMessage = "Unvalid parameters:";
+                bool userIsValid = true;
+                if (!validator.FirstNameIsValid(user.FirstName))
+                {
+                    userIsValid = false;
+                    exceptionMessage += " first name;";
+                }
+                if (!validator.LastNameIsValid(user.LastName))
+                {
+                    userIsValid = false;
+                    exceptionMessage += " last name;";
+                }
+                //if (!validator.PersonalIdIsValid(user.PersonalId))
+                //{
+                //    userIsValid = false;
+                //    exceptionMessage += " personal ID;";
+                //}
+                if (!validator.DateOfBirthIsValid(user.DateOfBirth))
+                {
+                    userIsValid = false;
+                    exceptionMessage += "date of birth;";
+                }
+                if (!validator.VisaRecordsAreValid(user.VisaRecords))
+                {
+                    userIsValid = false;
+                    exceptionMessage += " one of visas;";
+                }
+                if (!userIsValid)
+                    throw new UserValidationException(exceptionMessage);
             }
             user.Id = idGenerator.GenerateNewId();
             users.Add(user);

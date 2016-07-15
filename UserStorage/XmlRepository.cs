@@ -26,9 +26,9 @@ namespace UserStorage
                     while (!reader.EOF)
                     {
                         reader.ReadStartElement("User");
-                        int personalId = Int32.Parse(reader.ReadElementString("PersonalId"));
                         string a = reader.ReadElementString("Name");
                         string b = reader.ReadElementString("Surname");
+                        string personalId = reader.ReadElementString("PersonalId");
                         //int d = Int32.Parse(reader.ReadElementString("Year"));
                         users.Add(new User(a, b, personalId, DateTime.Now,Gender.Male,null));
                         reader.ReadEndElement();

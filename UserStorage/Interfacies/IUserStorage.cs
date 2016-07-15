@@ -6,7 +6,7 @@ namespace UserStorage.Interfacies
 {
     public interface IUserStorage
     {
-        int Add(User user);
+        int Add(User user, IUserValidator validator = null);
         IEnumerable<int> SearchForUser(params Func<User, bool>[] predicates);
         void Delete(User user);
         void Delete(int id);
