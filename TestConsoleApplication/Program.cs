@@ -8,6 +8,7 @@ using System.Configuration;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using UserStorage.Concrete;
 
 namespace TestConsoleApplication
 {
@@ -15,19 +16,34 @@ namespace TestConsoleApplication
     {
         public static void Main(string[] args)
         {
-            int currentId = int.Parse(ConfigurationManager.AppSettings.Get("CurrentId"));
+            var users = new List<User>()
+            {
+                new User("Name", "Surname", "12345", DateTime.Now, Gender.Female, null),
+                new User("Name2", "Surname2", "54321", DateTime.Now, Gender.Female, null)
+            };
+            State state = new State(users, 3);
             string path = ConfigurationManager.AppSettings.Get("FilePath");
-            Console.WriteLine(currentId);
             Console.WriteLine(path);
-            currentId = 13;
-            path = "file2.xml";
+            IStateSaver saver = new XmlStateSaver();
 
-            Console.WriteLine("----------------");
-            WriteInConfig(currentId, path);
-            currentId = int.Parse(ConfigurationManager.AppSettings.Get("CurrentId"));
-            path = ConfigurationManager.AppSettings.Get("FilePath");
-            Console.WriteLine(currentId);
-            Console.WriteLine(path);
+            saver.SaveState(path, state);
+            State newState = saver.LoadState(path);
+
+
+            //int currentId = int.Parse(ConfigurationManager.AppSettings.Get("CurrentId"));
+            //string path = ConfigurationManager.AppSettings.Get("FilePath");
+            //Console.WriteLine(currentId);
+            //Console.WriteLine(path);
+            //currentId = 13;
+            //path = "file2.xml";
+
+            //Console.WriteLine("----------------");
+            //WriteInConfig(currentId, path);
+            //currentId = int.Parse(ConfigurationManager.AppSettings.Get("CurrentId"));
+            //path = ConfigurationManager.AppSettings.Get("FilePath");
+            //Console.WriteLine(currentId);
+            //Console.WriteLine(path);
+
             //TestCustomConfig();
             //TestStorage();
             Console.ReadKey();
@@ -46,11 +62,11 @@ namespace TestConsoleApplication
 
         static void TestStorage()
         {
-            IUserStorage storage = new UserStorageInMemory();
+            IUserStorage storage = new MemoryUserStorage();
             IRepository<User> repository = new XmlRepository();
 
-            storage.Add(new User("Name", "Surname", 12345, DateTime.Now, Gender.Female, null));
-            storage.Add(new User("Name2", "Surname2", 54321, DateTime.Now, Gender.Female, null));
+            storage.Add(new User("Name", "Surname", "12345", DateTime.Now, Gender.Female, null));
+            storage.Add(new User("Name2", "Surname2", "54321", DateTime.Now, Gender.Female, null));
 
             try
             {

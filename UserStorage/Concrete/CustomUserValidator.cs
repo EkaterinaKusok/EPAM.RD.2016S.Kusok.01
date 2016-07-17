@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using UserStorage.Entities;
 using UserStorage.Interfacies;
 
-namespace UserStorage
+namespace UserStorage.Concrete
 {
     public class CustomUserValidator : IUserValidator
     {

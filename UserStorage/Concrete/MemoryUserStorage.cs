@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UserStorage.Concrete;
 using UserStorage.Entities;
 using UserStorage.Interfacies;
 
 namespace UserStorage
 {
-    public class UserStorageInMemory : IUserStorage
+    public class MemoryUserStorage : IUserStorage
     {
         private List<User> users;
 
         private readonly IGenerator<int> idGenerator = new CustomIdGenerator();
 
-        public UserStorageInMemory(IGenerator<int> generator)
+        public MemoryUserStorage(IGenerator<int> generator = null)
         {
             if (generator != null)
                 this.idGenerator = generator;
@@ -79,43 +80,54 @@ namespace UserStorage
             users.RemoveAll(x => x.Equals(user));
         }
         
-        public IEnumerable<int> SearchForUser(params Func<User, bool>[] predicates)
+        public IEnumerable<User> Load()
+        {
+            return users;
+        }
+
+        public void Save(IEnumerable<User> users)
+        {
+            this.users = users.ToList();
+        }
+
+
+        public IEnumerable<User> SearchForUser(params Func<User, bool>[] predicates)
         {
             if (!users.Any())
-                return new int[0];
+                return new User[0];
             if (predicates.Count() == 0)
-                return users.Select(u => u.Id);
+                return users.Select(u => u);
             Func<User, bool> commonPredicate = predicates[0];
             if (predicates.Count() > 1)
                 foreach (var predicate in predicates)
                     commonPredicate += predicate;
-            return users.Where(commonPredicate).Select(u => u.Id);
+            return users.Where(commonPredicate);
         }
 
-        public IEnumerable<int> AddUsers(IEnumerable<User> newUsers)
-        {
-            var userIds = new List<int>();
-            foreach (var user in newUsers)
-            {
-                userIds.Add(this.Add(user));
-            }
-            return userIds;
-        }
+        //public IEnumerable<int> AddUsers(IEnumerable<User> newUsers)
+        //{
+        //    var userIds = new List<int>();
+        //    foreach (var user in newUsers)
+        //    {
+        //        userIds.Add(this.Add(user));
+        //    }
+        //    return userIds;
+        //}
 
-        public IEnumerable<User> GetAllUsers()
-        {
-            return users.Select(u => u);
-        }
+        //public IEnumerable<User> GetAllUsers()
+        //{
+        //    return users.Select(u => u);
+        //}
 
-        public void DeleteAllUsers()
-        {
-            users.Clear();
-        }
+        //public void DeleteAllUsers()
+        //{
+        //    users.Clear();
+        //}
 
-        public void SetCurrentId(int currentId)
-        {
-            idGenerator.SetCurrentId(currentId);
-        }
+        //public void SetCurrentId(int currentId)
+        //{
+        //    idGenerator.SetCurrentId(currentId);
+        //}
+
     }
 }
-
