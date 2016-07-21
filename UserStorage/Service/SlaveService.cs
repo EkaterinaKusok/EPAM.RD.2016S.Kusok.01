@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UserStorage.Entities;
-using UserStorage.Interfacies;
+using UserStorage.UserEntities;
+using UserStorage.UserStorage;
 
-namespace UserStorage.Concrete
+namespace UserStorage.Service
 {
     public class SlaveService : IService
     {

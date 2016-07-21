@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using UserStorage.Entities;
-
-namespace UserStorage.Interfacies
+﻿
+namespace UserStorage.StateSaver
 {
     public interface IStateSaver
     {

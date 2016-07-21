@@ -1,4 +1,6 @@
-﻿namespace UserStorage.Interfacies
+﻿using System.Collections.Generic;
+
+namespace UserStorage.Generator
 {
     public interface IGenerator<T>
     {

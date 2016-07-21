@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using UserStorage.Entities;
-using UserStorage.Interfacies;
+using UserStorage.UserEntities;
 
-namespace UserStorage.Concrete
+namespace UserStorage.Validator
 {
     public class CustomUserValidator : IUserValidator
     {

@@ -1,7 +1,7 @@
 ﻿using System;
-using UserStorage.Entities;
+using UserStorage.UserEntities;
 
-namespace UserStorage.Interfacies
+namespace UserStorage.Validator
 {
     public interface IUserValidator
     {

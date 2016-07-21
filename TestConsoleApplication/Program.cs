@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using UserStorage;
-using UserStorage.Entities;
+using UserStorage.UserEntities;
 using UserStorage.Interfacies;
 using System.Configuration;
 using System.Collections.Specialized;

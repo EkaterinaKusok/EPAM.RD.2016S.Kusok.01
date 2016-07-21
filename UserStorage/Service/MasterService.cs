@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using UserStorage.Entities;
-using UserStorage.Interfacies;
+using UserStorage.UserEntities;
+using UserStorage.Generator;
+using UserStorage.StateSaver;
+using UserStorage.UserStorage;
+using UserStorage.Validator;
 
-namespace UserStorage.Concrete
+namespace UserStorage.Service
 {
     public class MasterService :IService
     {
         private int _lastId = 0;
         private readonly IUserStorage _storage = new MemoryUserStorage();
-        private readonly IStateSaver _steateSaver = new XmlStateSaver();
+        private readonly IStateSaver _stateSaver = new XmlStateSaver();
         private readonly IUserValidator _validator = new CustomUserValidator();
-        private readonly IGenerator<int> _generator = new CustomIdGenerator();
+        private readonly IGenerator<int> _generator = new PrimeIdGenerator();
         public event EventHandler<StorageEventArgs> UserChanged = delegate { };
         private static readonly BooleanSwitch boolSwitch = new BooleanSwitch("logSwitch", string.Empty);
 
@@ -72,7 +75,7 @@ namespace UserStorage.Concrete
         public void SaveState(string fileName)
         {
             State state = new State() { Users = _storage.Load(), LastId = _lastId };
-            _steateSaver.SaveState(fileName, state);
+            _stateSaver.SaveState(fileName, state);
             if (boolSwitch.Enabled)
             {
                 Trace.TraceInformation("Save state. {fileName}");
@@ -81,7 +84,7 @@ namespace UserStorage.Concrete
 
         public void LoadState(string fileName)
         {
-            State state = _steateSaver.LoadState(fileName);
+            State state = _stateSaver.LoadState(fileName);
             _storage.Save(state.Users);
             _lastId = state.LastId;
             if (boolSwitch.Enabled)

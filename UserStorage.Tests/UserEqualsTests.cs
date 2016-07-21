@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UserStorage.Entities;
+using UserStorage.UserEntities;
 
 namespace UserStorage.Tests
 {

@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UserStorage.Concrete;
-using UserStorage.Entities;
-using UserStorage.Interfacies;
+using UserStorage.UserEntities;
+using UserStorage.Generator;
+using UserStorage.UserStorage;
+using UserStorage.Validator;
 
 namespace UserStorage
 {
+    [Serializable]
     public class MemoryUserStorage : IUserStorage
     {
         private List<User> users;
 
-        private readonly IGenerator<int> idGenerator = new CustomIdGenerator();
+        private readonly IGenerator<int> idGenerator = new PrimeIdGenerator();
 
         public MemoryUserStorage(IGenerator<int> generator = null)
         {
@@ -80,17 +82,6 @@ namespace UserStorage
             users.RemoveAll(x => x.Equals(user));
         }
         
-        public IEnumerable<User> Load()
-        {
-            return users;
-        }
-
-        public void Save(IEnumerable<User> users)
-        {
-            this.users = users.ToList();
-        }
-
-
         public IEnumerable<User> SearchForUser(params Func<User, bool>[] predicates)
         {
             if (!users.Any())
@@ -103,16 +94,6 @@ namespace UserStorage
                     commonPredicate += predicate;
             return users.Where(commonPredicate);
         }
-
-        //public IEnumerable<int> AddUsers(IEnumerable<User> newUsers)
-        //{
-        //    var userIds = new List<int>();
-        //    foreach (var user in newUsers)
-        //    {
-        //        userIds.Add(this.Add(user));
-        //    }
-        //    return userIds;
-        //}
 
         //public IEnumerable<User> GetAllUsers()
         //{

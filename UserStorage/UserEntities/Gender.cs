@@ -1,6 +1,5 @@
-﻿using System;
-
-namespace UserStorage.Entities
+﻿
+namespace UserStorage.UserEntities
 {
     public enum Gender
     {

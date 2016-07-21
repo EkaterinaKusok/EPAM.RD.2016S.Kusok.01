@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using UserStorage.Entities;
+using UserStorage.UserEntities;
 
-namespace UserStorage.Interfacies
+namespace UserStorage.Service
 {
     public interface IService
     {
+        bool IsMaster { get;}
+
         int AddUser(User user);
         void DeleteUser(User user);
         void Delete(int id);

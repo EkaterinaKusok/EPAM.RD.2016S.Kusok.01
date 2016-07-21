@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace UserStorage.Entities
+namespace UserStorage.UserEntities
 {
     [Serializable]
     public class User

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UserStorage.UserEntities;
 
-namespace UserStorage.Entities
+namespace UserStorage.StateSaver
 {
     [Serializable]
     public class State

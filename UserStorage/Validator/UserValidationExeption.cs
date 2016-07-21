@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UserStorage
+namespace UserStorage.Validator
 {
     [Serializable]
     public class UserValidationException : Exception

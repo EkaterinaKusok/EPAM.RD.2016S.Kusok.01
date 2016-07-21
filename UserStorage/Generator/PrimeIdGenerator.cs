@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UserStorage.Generator;
 using UserStorage.Interfacies;
 
-namespace UserStorage.Concrete
+namespace UserStorage.Generator
 {
-    public class CustomIdGenerator : IGenerator<int>
+    public class PrimeIdGenerator : IGenerator<int>
     {
-        private readonly Sequence sequence = new Sequence();
+        private readonly PrimeSequence sequence = new PrimeSequence();
 
         public int GenerateNewId()
         {
@@ -35,9 +36,10 @@ namespace UserStorage.Concrete
         {
             return sequence.Current;
         }
+        
     }
 
-    public class Sequence : IEnumerator<int>
+    public class PrimeSequence : IEnumerator<int>
     {
         private int current;
         public int Current
@@ -54,7 +56,7 @@ namespace UserStorage.Concrete
             }
         }
 
-        public Sequence()
+        public PrimeSequence()
         {
             current = 1;
         }

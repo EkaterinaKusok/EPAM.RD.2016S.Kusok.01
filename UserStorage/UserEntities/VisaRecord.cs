@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UserStorage.Entities
+namespace UserStorage.UserEntities
 {
     public struct VisaRecord
     {

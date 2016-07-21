@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using UserStorage.Entities;
+using UserStorage.UserEntities;
+using UserStorage.Validator;
 
-namespace UserStorage.Interfacies
+namespace UserStorage.UserStorage
 {
     public interface IUserStorage
     {
@@ -10,9 +11,6 @@ namespace UserStorage.Interfacies
         IEnumerable<User> SearchForUser(params Func<User, bool>[] predicates);
         void Delete(User user);
         void Delete(int id);
-
-        void Save(IEnumerable<User> users);
-        IEnumerable<User> Load();
     }
 }
 

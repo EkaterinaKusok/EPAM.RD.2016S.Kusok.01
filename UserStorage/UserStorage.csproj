@@ -40,24 +40,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Concrete\CustomIdGenerator.cs" />
-    <Compile Include="Concrete\MasterService.cs" />
-    <Compile Include="Concrete\SlaveService.cs" />
-    <Compile Include="Entities\Gender.cs" />
-    <Compile Include="Entities\State.cs" />
-    <Compile Include="Entities\User.cs" />
-    <Compile Include="Entities\VisaRecord.cs" />
-    <Compile Include="Interfacies\IGenerator.cs" />
-    <Compile Include="Interfacies\IService.cs" />
-    <Compile Include="Interfacies\IStateSaver.cs" />
-    <Compile Include="Interfacies\IUserStorage.cs" />
-    <Compile Include="Interfacies\IUserValidator.cs" />
+    <Compile Include="Generator\PrimeIdGenerator.cs" />
+    <Compile Include="Service\MasterService.cs" />
+    <Compile Include="Service\SlaveService.cs" />
+    <Compile Include="UserEntities\Gender.cs" />
+    <Compile Include="StateSaver\State.cs" />
+    <Compile Include="UserEntities\User.cs" />
+    <Compile Include="UserEntities\VisaRecord.cs" />
+    <Compile Include="Generator\IGenerator.cs" />
+    <Compile Include="Service\IService.cs" />
+    <Compile Include="StateSaver\IStateSaver.cs" />
+    <Compile Include="UserStorage\IUserStorage.cs" />
+    <Compile Include="UserStorage\LoggerDecorator.cs" />
+    <Compile Include="Validator\IUserValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Concrete\MemoryUserStorage.cs" />
-    <Compile Include="Concrete\CustomUserValidator.cs" />
+    <Compile Include="UserStorage\MemoryUserStorage.cs" />
+    <Compile Include="Validator\CustomUserValidator.cs" />
     <Compile Include="StorageEventArgs.cs" />
-    <Compile Include="UserValidationExeption.cs" />
-    <Compile Include="Concrete\XmlStateSaver.cs" />
+    <Compile Include="Validator\UserValidationExeption.cs" />
+    <Compile Include="StateSaver\XmlStateSaver.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

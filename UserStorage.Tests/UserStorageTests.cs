@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UserStorage.Entities;
+using UserStorage.UserEntities;
 using UserStorage.Interfacies;
 
 namespace UserStorage.Tests
