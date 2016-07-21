@@ -40,6 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configurator\Configurator.cs" />
+    <Compile Include="Configurator\ServiceDescription.cs" />
+    <Compile Include="Configurator\ServicesConfigSection..cs" />
     <Compile Include="Generator\PrimeIdGenerator.cs" />
     <Compile Include="Service\MasterService.cs" />
     <Compile Include="Service\SlaveService.cs" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using UserStorage.Concrete;
+using UserStorage.Generator;
+
 
 namespace UserStorage.Tests
 {
@@ -10,14 +11,14 @@ namespace UserStorage.Tests
         [TestMethod]
         public void GenerateNewId_IsFirstElement_ReturnOne()
         {
-            var generator = new CustomIdGenerator();
+            var generator = new PrimeIdGenerator();
             Assert.AreEqual(1, generator.GenerateNewId());
         }
 
         [TestMethod]
         public void GenerateNewId_IsSecondElement_ReturnTwo()
         {
-            var generator = new CustomIdGenerator();
+            var generator = new PrimeIdGenerator();
             generator.GenerateNewId();
             Assert.AreEqual(2, generator.GenerateNewId());
         }
@@ -27,7 +28,7 @@ namespace UserStorage.Tests
         public void GenerateNewId_IsOverflow_ReturnAnException()
         {
 
-            var generator = new CustomIdGenerator();
+            var generator = new PrimeIdGenerator();
             generator.GenerateNewId(Int32.MaxValue);
         }
     }

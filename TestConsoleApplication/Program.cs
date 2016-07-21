@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Configuration;
 using UserStorage;
 using UserStorage.UserEntities;
-using UserStorage.Interfacies;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using UserStorage.Concrete;
+using UserStorage.StateSaver;
+using UserStorage.UserStorage;
 
 namespace TestConsoleApplication
 {
@@ -16,18 +16,23 @@ namespace TestConsoleApplication
     {
         public static void Main(string[] args)
         {
-            var users = new List<User>()
-            {
-                new User("Name", "Surname", "12345", DateTime.Now, Gender.Female, null),
-                new User("Name2", "Surname2", "54321", DateTime.Now, Gender.Female, null)
-            };
-            State state = new State(users, 3);
-            string path = ConfigurationManager.AppSettings.Get("FilePath");
-            Console.WriteLine(path);
-            IStateSaver saver = new XmlStateSaver();
 
-            saver.SaveState(path, state);
-            State newState = saver.LoadState(path);
+            //ServicesConfigSection servicesSection = (ServicesConfigSection)ConfigurationManager.GetSection("Services");
+
+            Console.ReadLine();
+
+            //var users = new List<User>()
+            //{
+            //    new User("Name", "Surname", "12345", DateTime.Now, Gender.Female, null),
+            //    new User("Name2", "Surname2", "54321", DateTime.Now, Gender.Female, null)
+            //};
+            //State state = new State(users, 3);
+            //string path = ConfigurationManager.AppSettings.Get("FilePath");
+            //Console.WriteLine(path);
+            //IStateSaver saver = new XmlStateSaver();
+
+            //saver.SaveState(path, state);
+            //State newState = saver.LoadState(path);
 
 
             //int currentId = int.Parse(ConfigurationManager.AppSettings.Get("CurrentId"));
@@ -60,31 +65,7 @@ namespace TestConsoleApplication
             }
         }
 
-        static void TestStorage()
-        {
-            IUserStorage storage = new MemoryUserStorage();
-            IRepository<User> repository = new XmlRepository();
-
-            storage.Add(new User("Name", "Surname", "12345", DateTime.Now, Gender.Female, null));
-            storage.Add(new User("Name2", "Surname2", "54321", DateTime.Now, Gender.Female, null));
-
-            try
-            {
-                repository.Save("list.xml", storage.GetAllUsers());
-                Console.WriteLine("Saved!");
-                IEnumerable<User> users = repository.Load("list.xml");
-                storage.DeleteAllUsers();
-                storage.AddUsers(users);
-                foreach (var user in storage.GetAllUsers())
-                {
-                    Console.WriteLine(user.Id + " " + user.LastName);
-                }
-            }
-            catch (ApplicationException e)
-            {
-            }
-        }
-
+        
         static void WriteInConfig(int currentId, string filePath)
         {
             if (!ConfigurationManager.AppSettings.AllKeys.Contains("CurrentId"))
