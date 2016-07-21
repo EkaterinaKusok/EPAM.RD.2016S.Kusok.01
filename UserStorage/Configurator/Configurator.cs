@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UserStorage.Service;
 using UserStorage.UserEntities;
 using System.Configuration;
@@ -40,7 +37,7 @@ namespace UserStorage.Configurator
 
         public void End()
         {
-            ((IService)masterService).SaveState();
+            //((IService)masterService).SaveState();
         }
     }
 

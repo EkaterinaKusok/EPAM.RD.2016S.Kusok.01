@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using UserStorage.Configurator;
 using UserStorage.StateSaver;
 using UserStorage.UserStorage;
 
@@ -17,7 +18,7 @@ namespace TestConsoleApplication
         public static void Main(string[] args)
         {
 
-            //ServicesConfigSection servicesSection = (ServicesConfigSection)ConfigurationManager.GetSection("Services");
+            ServicesConfigSection servicesSection = (ServicesConfigSection)ConfigurationManager.GetSection("Services");
 
             Console.ReadLine();
 
