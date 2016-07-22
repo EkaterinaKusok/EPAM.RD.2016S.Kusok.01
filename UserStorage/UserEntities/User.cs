@@ -5,7 +5,7 @@ namespace UserStorage.UserEntities
     [Serializable]
     public class User
     { 
-        public int Id { get; set; }
+        public int Id { get;}
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string PersonalId { get; set; } //PassportNumber
@@ -13,9 +13,13 @@ namespace UserStorage.UserEntities
         public Gender Gender { get; set; }
         public VisaRecord[] VisaRecords { get; set; }
 
-        public User(string firstName, string lastName, string personalId, DateTime dateOfBirth, Gender gender, VisaRecord[] visaRecords)
+        public User(int id)
         {
-            Id = 0;
+            Id = id;
+        }
+        public User(int id, string firstName, string lastName, string personalId, DateTime dateOfBirth, Gender gender, VisaRecord[] visaRecords)
+        {
+            Id = id;
             FirstName = firstName;
             LastName = lastName;
             PersonalId = personalId;
@@ -38,7 +42,7 @@ namespace UserStorage.UserEntities
 
         public override int GetHashCode()
         {
-            return (Id.GetHashCode()  ^ LastName.GetHashCode());
+            return Id.GetHashCode();
         }
         
     }
