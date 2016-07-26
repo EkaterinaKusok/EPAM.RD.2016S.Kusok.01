@@ -16,11 +16,11 @@ namespace UserStorage.Tests
         {
             var users = new List<User>()
             {
-                new User("Name", "Surname", "1", new DateTime(2000, 1, 1), Gender.Male, null),
-                new User("Name", "Surname", "2", new DateTime(2000, 1, 1), Gender.Male, null),
-                new User("OtherName", "OtherSurname", "3", new DateTime(2000, 1, 1), Gender.Female, null)
+                new User(0,"Name", "Surname", "1", new DateTime(2000, 1, 1), Gender.Male, null),
+                new User(0,"Name", "Surname", "2", new DateTime(2000, 1, 1), Gender.Male, null),
+                new User(0,"OtherName", "OtherSurname", "3", new DateTime(2000, 1, 1), Gender.Female, null)
             };
-            IUserStorage storage = new MemoryUserStorage();
+            IUserStorage storage = new MemoryUserStorage(null,null,null);
             foreach (var user in users)
             {
                 storage.Add(user);

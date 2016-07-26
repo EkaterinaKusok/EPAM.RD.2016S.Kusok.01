@@ -1,9 +1,8 @@
-﻿
-namespace UserStorage.StateSaver
+﻿namespace UserStorage.StateSaver
 {
     public interface IStateSaver
     {
-        State LoadState(string path);
-        void SaveState(string path, State state);
+        UserState LoadState();
+        void SaveState(UserState state);
     }
 }

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UserStorage.UserEntities;
 using UserStorage.Generator;
-using UserStorage.UserStorage;
+using UserStorage.StateSaver;
 using UserStorage.Validator;
 
-namespace UserStorage
+namespace UserStorage.UserStorage
 {
     [Serializable]
     public class MemoryUserStorage : IUserStorage
@@ -14,16 +14,24 @@ namespace UserStorage
         private List<User> users;
 
         private readonly IGenerator<int> idGenerator = new PrimeIdGenerator();
+        private readonly IUserValidator validator = null;
+        private readonly IStateSaver saver = new XmlStateSaver();
 
-        public MemoryUserStorage(IGenerator<int> generator = null)
+        public MemoryUserStorage(IGenerator<int> generator, IUserValidator validator, IStateSaver saver)
         {
-            if (generator != null)
-                this.idGenerator = generator;
+            this.idGenerator = generator;
+            this.validator = validator;
+            this.saver = saver;
             users = new List<User>();
         }
 
-        public int Add(User user, IUserValidator validator = null)
+        public int Add(User user)
         {
+            if ((object)user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            
             if (validator != null)
             {
                 string exceptionMessage = "Unvalid parameters:";
@@ -56,8 +64,21 @@ namespace UserStorage
                 if (!userIsValid)
                     throw new UserValidationException(exceptionMessage);
             }
-            user.Id = idGenerator.GenerateNewId();
-            users.Add(user);
+            //if (this.users.Any(u => u.Id == user.Id))
+            //{
+            //    throw new InvalidOperationException($"User with id={user.Id} already exist");
+            //}
+
+            int newId = idGenerator.GenerateNewId();
+            users.Add(new User(newId)
+            {
+                FirstName = user.FirstName,
+                LastName = user.FirstName,
+                DateOfBirth = user.DateOfBirth,
+                Gender = user.Gender,
+                PersonalId = user.PersonalId,
+                VisaRecords = user.VisaRecords
+            });
             return user.Id;
         }
 
@@ -66,21 +87,38 @@ namespace UserStorage
             var user = users.SingleOrDefault(u => u.Id == id);
             if (user == null)
             {
-                throw new InvalidOperationException( string.Format("User with Id = {0} doesn't exist", id));
+                throw new InvalidOperationException($"User with Id = {id} doesn't exist");
             }
             users.RemoveAll(u => u.Id == id);
         }
 
-        public void Delete(User user)
+        public void Save()
         {
-            var removingUser = users.SingleOrDefault(u => u.Equals(user));
-            if (removingUser == null)
+            var state = new UserState()
             {
-                throw new InvalidOperationException(string.Format("User with Id = {0} doesn't exist", user.Id));
-            }
-            users.RemoveAll(u => u.Id == user.Id);
-            users.RemoveAll(x => x.Equals(user));
+                Users = this.users,
+                CurrentId = this.idGenerator.GetCurrentId()
+            };
+            this.saver.SaveState(state);
         }
+
+        public void Load()
+        {
+            var state = this.saver.LoadState();
+            this.users = state.Users.ToList();
+            this.idGenerator.SetCurrentId(state.CurrentId);
+        }
+
+        //public void Delete(User user)
+        //{
+        //    var removingUser = users.SingleOrDefault(u => u.Equals(user));
+        //    if (removingUser == null)
+        //    {
+        //        throw new InvalidOperationException(string.Format("User with Id = {0} doesn't exist", user.Id));
+        //    }
+        //    users.RemoveAll(u => u.Id == user.Id);
+        //    users.RemoveAll(x => x.Equals(user));
+        //}
         
         public IEnumerable<User> SearchForUser(params Func<User, bool>[] predicates)
         {

@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using UserStorage;
 using UserStorage.UserEntities;
-using System.Configuration;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using UserStorage.Configurator;
-using UserStorage.StateSaver;
-using UserStorage.UserStorage;
+using UserStorage.Service;
 
 namespace TestConsoleApplication
 {
@@ -18,10 +15,16 @@ namespace TestConsoleApplication
         public static void Main(string[] args)
         {
 
-            ServicesConfigSection servicesSection = (ServicesConfigSection)ConfigurationManager.GetSection("Services");
-
+            var configurator = new ServiceConfigurator();
+            configurator.Start();
+            configurator.MasterService.Add(new User(0,"TestName","TestLastName","PassportNo",DateTime.Now,
+                Gender.Female, null));
+            ShowUsers(configurator.MasterService.SearchForUser(u=>true).ToList());
+            Console.WriteLine();
+            Thread.Sleep(1000);
+            ShowSlaves(configurator.SlaveServices);
             Console.ReadLine();
-
+            var date = DateTime.Now;
             //var users = new List<User>()
             //{
             //    new User("Name", "Surname", "12345", DateTime.Now, Gender.Female, null),
@@ -55,18 +58,6 @@ namespace TestConsoleApplication
             Console.ReadKey();
         }
 
-        static void TestCustomConfig()
-        {
-            StartupFoldersConfigSection section = (StartupFoldersConfigSection)ConfigurationManager.GetSection("StartupFolders");
-
-            if (section != null)
-            {
-                System.Diagnostics.Debug.WriteLine(section.FolderItems[0].FolderType);
-                System.Diagnostics.Debug.WriteLine(section.FolderItems[0].Path);
-            }
-        }
-
-        
         static void WriteInConfig(int currentId, string filePath)
         {
             if (!ConfigurationManager.AppSettings.AllKeys.Contains("CurrentId"))
@@ -97,6 +88,35 @@ namespace TestConsoleApplication
                 currentConfig.AppSettings.Settings["FilePath"].Value = filePath;
                 currentConfig.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
+        static void ShowSlaves(IEnumerable<IService> slaves)
+        {
+            foreach (var slave in slaves)
+            {
+                ShowUsers(slave.SearchForUser(u=>true).ToList());
+                Console.WriteLine();
+            }
+        }
+
+        static void ShowUsers(IEnumerable<User> users)
+        {
+            foreach (var user in users)
+            {
+                Console.WriteLine($"{user.PersonalId})\t{user.FirstName} {user.LastName}; {user.Gender}; {user.DateOfBirth}");
+                Console.Write($"Visas: ");
+
+                if (user.VisaRecords == null)
+                {
+                    Console.WriteLine("no visas");
+                    return;
+                }
+
+                foreach (var visa in user.VisaRecords)
+                {
+                    Console.Write($"{visa.Country}  ");
+                }
+                Console.WriteLine();
             }
         }
     }

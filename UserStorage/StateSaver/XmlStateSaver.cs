@@ -1,25 +1,37 @@
-﻿using System.IO;
+﻿using System.Configuration;
+using System.IO;
 using System.Xml.Serialization;
 
 namespace UserStorage.StateSaver
 {
     public class XmlStateSaver : IStateSaver
     {
-        public State LoadState(string path)
+        private readonly string _fileName;
+
+        public XmlStateSaver(string fileName = null)
         {
-            XmlSerializer formatter = new XmlSerializer(typeof (State));
-            State state = new State();
-            using (Stream s = new FileStream(path, FileMode.Open))
+            if (string.IsNullOrWhiteSpace(fileName))
             {
-                state = (State) formatter.Deserialize(s);
+                fileName = ConfigurationManager.AppSettings["XmlUserStoragePath"];
+            }
+            _fileName = fileName;
+        }
+
+        public UserState LoadState()
+        {
+            XmlSerializer formatter = new XmlSerializer(typeof (UserState));
+            UserState state = new UserState();
+            using (Stream s = new FileStream(_fileName, FileMode.Open))
+            {
+                state = (UserState) formatter.Deserialize(s);
             }
             return state;
         }
 
-        public void SaveState( string path, State state)
+        public void SaveState( UserState state)
         {
-            XmlSerializer formatter = new XmlSerializer(typeof (State));
-            using (FileStream s = File.Create(path))
+            XmlSerializer formatter = new XmlSerializer(typeof (UserState));
+            using (FileStream s = File.Create(_fileName))
             {
                 formatter.Serialize(s, state);
             }

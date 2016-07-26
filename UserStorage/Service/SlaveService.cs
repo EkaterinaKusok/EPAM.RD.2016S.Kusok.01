@@ -1,70 +1,103 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using System.Net.Sockets;
+using System.Text;
+using System.Web.Script.Serialization;
+using UserStorage.Generator;
+using UserStorage.ServiceInfo;
+using UserStorage.StateSaver;
 using UserStorage.UserEntities;
 using UserStorage.UserStorage;
+using UserStorage.Validator;
 
 namespace UserStorage.Service
 {
-    public class SlaveService : IService
+    [Serializable]
+    public class SlaveService : MarshalByRefObject, IService
     {
-        private int _lastId = 0;
-        private readonly IUserStorage _storage = new MemoryUserStorage();
-        public SlaveService(MasterService masterService)
+        private readonly TcpListener server;
+        private readonly IUserStorage userStorage;
+        public string Name { get; }
+        public ServiceMode Mode => ServiceMode.Slave;
+        
+        public SlaveService(IGenerator<int> idGenerator, IStateSaver saver, IUserValidator validator,
+            ConnectionInfo info)
         {
-            masterService.UserChanged += OnUsersChanged;
-            var state = masterService.InitSlaveRepository();
-            _storage.Save(state.Users);
-            _lastId = state.LastId;
+            userStorage = new MemoryUserStorage(idGenerator, validator, saver);
+            server = new TcpListener(info.IPAddress, info.Port);
+            server.Start();
         }
-        public int AddUser(User user)
+
+        public async void ListenForUpdates()
         {
+            var serializer = new JavaScriptSerializer();
+            try
+            {
+                while (true)
+                {
+                    using (TcpClient client = await server.AcceptTcpClientAsync())
+                    using (NetworkStream stream = client.GetStream())
+                    {
+                        string serializedMessage = string.Empty;
+                        byte[] data = new byte[1024];
+
+                        while (stream.DataAvailable)
+                        {
+                            int i = await stream.ReadAsync(data, 0, data.Length);
+                            serializedMessage += Encoding.UTF8.GetString(data, 0, i);
+                        }
+                        ServiceMessage message = serializer.Deserialize<ServiceMessage>(serializedMessage);
+                        UpdateOnModifying(message);
+                    }
+                }
+            }
+            finally
+            {
+                server.Stop();
+            }
+        }
+
+        private void UpdateOnModifying(ServiceMessage message)
+        {
+            switch (message.Operation)
+            {
+                case ServiceOperation.Add:
+                    userStorage.Add(message.User);
+                    break;
+                case ServiceOperation.Remove:
+                    userStorage.Delete(message.User.Id);
+                    break;
+            }
+        }
+        
+        public int Add(User user)
+        {
+            server.Stop();
             throw new NotSupportedException();
         }
 
-        public void DeleteUser(User user)
+        public IEnumerable<User> SearchForUser(params Func<User, bool>[] predicates)
         {
-            throw new NotSupportedException();
+            return this.userStorage.SearchForUser(predicates);
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<int> FindByGender(Gender gender)
-        {
-            return _storage.SearchForUser(u => u.Gender == gender).Select(u=>u.Id);
-        }
-
-        public void SaveState(string fileName)
-        {
+            server.Stop();
             throw new NotSupportedException();
         }
 
-        public void LoadState(string fileName)
+        public void Save()
         {
+            server.Stop();
             throw new NotSupportedException();
         }
 
-        public IEnumerable<int> FindByNameAndLastName(string firstName, string lastName)
+        public void Load()
         {
-            return _storage.SearchForUser(u => u.FirstName == firstName && u.LastName == lastName).Select(u => u.Id);
-        }
-
-        public IEnumerable<int> FindByPersonalId(string personalId)
-        {
-            return _storage.SearchForUser(u => u.PersonalId == personalId).Select(u => u.Id);
-        }
-        private void OnUsersChanged(object sender, StorageEventArgs e)
-        {
-            if (e.IsDelete)
-                _storage.Delete(e.User);
-            else
-            {
-                _storage.Add(e.User);
-                _lastId = e.LastId;
-            }
+            server.Stop();
+            throw new NotSupportedException();
         }
     }
 }

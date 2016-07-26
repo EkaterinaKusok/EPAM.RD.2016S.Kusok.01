@@ -1,100 +1,97 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+using System.Net.Sockets;
+using System.Text;
+using UserStorage.ServiceInfo;
 using UserStorage.UserEntities;
+using UserStorage.UserStorage;
+using System.Web.Script.Serialization;
 using UserStorage.Generator;
 using UserStorage.StateSaver;
-using UserStorage.UserStorage;
 using UserStorage.Validator;
 
 namespace UserStorage.Service
 {
-    public class MasterService :IService
+    [Serializable]
+    public class MasterService : MarshalByRefObject,IService 
     {
-        private int _lastId = 0;
-        private readonly IUserStorage _storage = new MemoryUserStorage();
-        private readonly IStateSaver _stateSaver = new XmlStateSaver();
-        private readonly IUserValidator _validator = new CustomUserValidator();
-        private readonly IGenerator<int> _generator = new PrimeIdGenerator();
-        public event EventHandler<StorageEventArgs> UserChanged = delegate { };
-        private static readonly BooleanSwitch boolSwitch = new BooleanSwitch("logSwitch", string.Empty);
+        private readonly IUserStorage userStorage;
+        public string Name { get; }
+        public ServiceMode Mode => ServiceMode.Master;
+        private readonly IEnumerable<ConnectionInfo> slavesInfo;
 
-        public State InitSlaveRepository()
+        public MasterService(string name, IUserStorage userStorage)
         {
-            return new State() { Users = _storage.Load(), LastId = _lastId };
+            if (userStorage == null)
+            {
+                throw new ArgumentNullException(nameof(userStorage));
+            }
+            this.userStorage = userStorage;
+            this.Name = name;
         }
 
-        public int AddUser(User user)
+        public MasterService(IGenerator<int> idGenerator, IStateSaver saver, IUserValidator validator, IEnumerable<ConnectionInfo> slavesInfo)
         {
-            //if (!_validator.ValidateUser(user))
-            //{
-            //    throw new ArgumentException(nameof(user));
-            //}
-            _lastId = _generator.GenerateNewId(_lastId);
-            user.Id = _lastId;
-            _storage.Add(user);
-            OnUserChanged(new StorageEventArgs(user, _lastId, false));
-            if (boolSwitch.Enabled)
-            {
-                Trace.TraceInformation($"Add user. {user.ToString()}");
-            }
-            return _lastId;
+            userStorage = new MemoryUserStorage(idGenerator, validator, saver);
+            this.slavesInfo = slavesInfo;
         }
 
-        public void DeleteUser(User user)
+        public int Add(User user)
         {
-            _storage.Delete(user);
-            OnUserChanged(new StorageEventArgs(user, _lastId, true));
-            if (boolSwitch.Enabled)
-            {
-                Trace.TraceInformation("Delete user. {user.ToString()}");
-            }
+            int id = this.userStorage.Add(user);
+            user.Id = id;
+            SendMessageToSlaves(new ServiceMessage(user, ServiceOperation.Add));
+            return id;
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
-        }
+            var users = userStorage.SearchForUser(u => u.Id == id);
+            this.userStorage.Delete(id);
 
-        public IEnumerable<int> FindByGender(Gender gender)
-        {
-            return _storage.SearchForUser(u => u.Gender == gender).Select(u => u.Id);
-        }
-
-        public IEnumerable<int> FindByNameAndLastName(string firstName, string lastName)
-        {
-            return _storage.SearchForUser(u => u.FirstName == firstName && u.LastName == lastName).Select(u => u.Id);
-        }
-
-        public IEnumerable<int> FindByPersonalId(string personalId)
-        {
-            return _storage.SearchForUser(u => u.PersonalId == personalId).Select(u => u.Id);
-        }
-
-        public void SaveState(string fileName)
-        {
-            State state = new State() { Users = _storage.Load(), LastId = _lastId };
-            _stateSaver.SaveState(fileName, state);
-            if (boolSwitch.Enabled)
+            foreach (var user in users)
             {
-                Trace.TraceInformation("Save state. {fileName}");
+                SendMessageToSlaves(new ServiceMessage(user, ServiceOperation.Remove));
             }
         }
 
-        public void LoadState(string fileName)
+        public IEnumerable<User> SearchForUser(params Func<User, bool>[] predicates)
         {
-            State state = _stateSaver.LoadState(fileName);
-            _storage.Save(state.Users);
-            _lastId = state.LastId;
-            if (boolSwitch.Enabled)
-            {
-                Trace.TraceInformation("Load state. {fileName}");
-            }
+            return this.userStorage.SearchForUser(predicates);
         }
-        protected virtual void OnUserChanged(StorageEventArgs e)
+
+        public void Save()
         {
-            UserChanged.Invoke(this, e);
+            this.userStorage.Save();
+        }
+
+        public void Load()
+        {
+            this.userStorage.Load();
+        }
+
+        public void ListenForUpdates()
+        {
+            throw new NotSupportedException();
+        }
+
+        private void SendMessageToSlaves<T>(T message)
+        {
+            var serializer = new JavaScriptSerializer();
+            string serializedMessage = serializer.Serialize(message);
+            byte[] data = Encoding.UTF8.GetBytes(serializedMessage);
+
+            foreach (var slave in slavesInfo)
+            {
+                using (TcpClient client = new TcpClient())
+                {
+                    client.Connect(slave.IPAddress, slave.Port);
+                    using (NetworkStream stream = client.GetStream())
+                    {
+                        stream.Write(data, 0, data.Length);
+                    }
+                }
+            }
         }
     }
 }
