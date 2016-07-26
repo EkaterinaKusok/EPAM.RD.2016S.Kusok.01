@@ -68,7 +68,7 @@ namespace UserStorage.Configurator
             MasterService.Load();
         }
 
-        public void End()
+        public void Stop()
         {
             MasterService.Save();
         }

@@ -2,6 +2,7 @@
 
 namespace UserStorage.UserEntities
 {
+    [Serializable]
     public struct VisaRecord
     {
         public string Country { get; private set; }
