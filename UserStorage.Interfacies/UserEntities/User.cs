@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace UserStorage.Interfacies.UserEntities
 {
     [Serializable]
-    public class User
+    public class User : ISerializable
     { 
         public int Id { get; set; }
         public string FirstName { get; set; }
@@ -44,6 +45,32 @@ namespace UserStorage.Interfacies.UserEntities
         {
             return Id.GetHashCode();
         }
+
         
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            // Use the AddValue method to specify serialized values.
+            info.AddValue("Id", Id, typeof(int));
+            info.AddValue("FirstName", FirstName, typeof(string));
+            info.AddValue("LastName", LastName, typeof(string));
+            info.AddValue("PersonalId", PersonalId, typeof(string));
+            info.AddValue("DateOfBirth", DateOfBirth, typeof(DateTime));
+            info.AddValue("Gender", Gender, typeof(Gender));
+            info.AddValue("VisaRecords", VisaRecords, typeof(VisaRecord[]));
+
+        }
+        // The special constructor is used to deserialize values.
+        public User(SerializationInfo info, StreamingContext context)
+        {
+            // Reset the property value using the GetValue method.
+            Id = (int)info.GetValue("Id", typeof(int));
+            FirstName = (string)info.GetValue("FirstName", typeof(string));
+            LastName = (string)info.GetValue("LastName", typeof(string));
+            PersonalId = (string)info.GetValue("PersonalId", typeof(string));
+            DateOfBirth = (DateTime)info.GetValue("DateOfBirth", typeof(DateTime));
+            Gender = (Gender)info.GetValue("Gender", typeof(Gender));
+            VisaRecords = (VisaRecord[])info.GetValue("VisaRecords", typeof(VisaRecord[]));
+        }
+
     }
 }
