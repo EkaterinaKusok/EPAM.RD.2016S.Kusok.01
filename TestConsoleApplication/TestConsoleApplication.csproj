@@ -51,6 +51,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Configurator\Configurator.csproj">
+      <Project>{97e64831-11dc-44ca-8366-b9e145cbf0cf}</Project>
+      <Name>Configurator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UserStorage.Interfacies\UserStorage.Interfacies.csproj">
+      <Project>{8f7f8a0b-9ae1-4541-bba3-368ee0ddeabb}</Project>
+      <Name>UserStorage.Interfacies</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UserStorage\UserStorage.csproj">
       <Project>{cfca53c6-264d-4e8d-9a6a-ce40cc3213c4}</Project>
       <Name>UserStorage</Name>

@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UserStorage.UserEntities;
-using UserStorage.Generator;
+using Generator;
+using UserStorage.Interfacies.Generators;
+using UserStorage.Interfacies.ServiceInfo;
+using UserStorage.Interfacies.StateSavers;
+using UserStorage.Interfacies.Storages;
+using UserStorage.Interfacies.UserEntities;
+using UserStorage.Interfacies.Validators;
 using UserStorage.StateSaver;
 using UserStorage.Validator;
 
@@ -16,6 +21,11 @@ namespace UserStorage.UserStorage
         private readonly IGenerator<int> idGenerator = new PrimeIdGenerator();
         private readonly IUserValidator validator = null;
         private readonly IStateSaver saver = new XmlStateSaver();
+
+        public MemoryUserStorage()
+        {
+            users = new List<User>();
+        }
 
         public MemoryUserStorage(IGenerator<int> generator, IUserValidator validator, IStateSaver saver)
         {
@@ -70,8 +80,9 @@ namespace UserStorage.UserStorage
             //}
 
             int newId = idGenerator.GenerateNewId();
-            users.Add(new User(newId)
+            users.Add(new User()
             {
+                Id = newId,
                 FirstName = user.FirstName,
                 LastName = user.FirstName,
                 DateOfBirth = user.DateOfBirth,
@@ -94,7 +105,7 @@ namespace UserStorage.UserStorage
 
         public void Save()
         {
-            var state = new UserState()
+            var state = new StorageState()
             {
                 Users = this.users,
                 CurrentId = this.idGenerator.GetCurrentId()

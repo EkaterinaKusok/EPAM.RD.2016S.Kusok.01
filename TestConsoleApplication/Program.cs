@@ -1,61 +1,122 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using UserStorage.UserEntities;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using UserStorage.Configurator;
+using Configurator;
+using UserStorage.Interfacies.Services;
+using UserStorage.Interfacies.UserEntities;
 using UserStorage.Service;
+using UserStorage.StateSaver;
+using UserStorage.Interfacies.ServiceInfo;
 
 namespace TestConsoleApplication
 {
     public class Program
     {
-        public static void Main(string[] args)
-        {
+        private static volatile bool endWork;
 
+        private static void Main(string[] args)
+        {
+            SaveExample();
+
+            List<Thread> threads = new List<Thread>();
             var configurator = new ServiceConfigurator();
             configurator.Start();
-            configurator.MasterService.Add(new User(0,"TestName","TestLastName","PassportNo",DateTime.Now,
-                Gender.Female, null));
-            ShowUsers(configurator.MasterService.SearchForUser(u=>true).ToList());
-            Console.WriteLine();
-            Thread.Sleep(1000);
-            ShowSlaves(configurator.SlaveServices);
-            Console.ReadLine();
-            var date = DateTime.Now;
-            //var users = new List<User>()
-            //{
-            //    new User("Name", "Surname", "12345", DateTime.Now, Gender.Female, null),
-            //    new User("Name2", "Surname2", "54321", DateTime.Now, Gender.Female, null)
-            //};
-            //State state = new State(users, 3);
-            //string path = ConfigurationManager.AppSettings.Get("FilePath");
-            //Console.WriteLine(path);
-            //IStateSaver saver = new XmlStateSaver();
 
-            //saver.SaveState(path, state);
-            //State newState = saver.LoadState(path);
+            threads.Add(new Thread(() => WorkMaster(configurator.MasterService)));
+            threads.AddRange(configurator.SlaveServices.Select(slave => new Thread(() => WorkSlave(slave))));
 
+            foreach (Thread thread in threads)
+            {
+                thread.Start();
+            }
 
-            //int currentId = int.Parse(ConfigurationManager.AppSettings.Get("CurrentId"));
-            //string path = ConfigurationManager.AppSettings.Get("FilePath");
-            //Console.WriteLine(currentId);
-            //Console.WriteLine(path);
-            //currentId = 13;
-            //path = "file2.xml";
-
-            //Console.WriteLine("----------------");
-            //WriteInConfig(currentId, path);
-            //currentId = int.Parse(ConfigurationManager.AppSettings.Get("CurrentId"));
-            //path = ConfigurationManager.AppSettings.Get("FilePath");
-            //Console.WriteLine(currentId);
-            //Console.WriteLine(path);
-
-            //TestCustomConfig();
-            //TestStorage();
+            Console.WriteLine("Press any key to end work of services.");
             Console.ReadKey();
+            endWork = true;
+
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+
+            configurator.End();
+
+            Console.WriteLine("Press any key to exit.");
+            Console.ReadLine();
+        }
+
+        private static void WorkMaster(IService master)
+        {
+            while (!endWork)
+            {
+                master.Add(new User {FirstName = "Test", LastName = "LTest"});
+                User firstUser = master.SearchForUser(new Func<User, bool>[] {u => true}).FirstOrDefault();
+                master.Delete(firstUser.Id);
+                Thread.Sleep(1000);
+            }
+        }
+
+        private static void WorkSlave(IService slave)
+        {
+            while (!endWork)
+            {
+                slave.SearchForUser(new Func<User, bool>[] {u => u.FirstName == "Test"});
+                Thread.Sleep(1000);
+            }
+        }
+
+        private static void SaveExample()
+        {
+            var saver = new XmlStateSaver();
+
+            var users = new List<User>
+            {
+                new User
+                {
+                    PersonalId = "1",
+                    FirstName = "John",
+                    LastName = "Doe",
+                    DateOfBirth = new DateTime(1996, 5, 5),
+                    Gender = Gender.Female,
+                    VisaRecords = new VisaRecord[]
+                    {
+                        new VisaRecord("Austria", new DateTime(2015, 08, 06), new DateTime(2015, 09, 16)),
+                        new VisaRecord("Italy", new DateTime(2016, 01, 05), new DateTime(2016, 02, 22))
+                    }
+                },
+                new User
+                {
+                    PersonalId = "2",
+                    FirstName = "Unnamed",
+                    LastName = "Person",
+                    DateOfBirth = new DateTime(1995, 7, 3),
+                    Gender = Gender.Male,
+                    VisaRecords = new VisaRecord[]
+                    {
+                        new VisaRecord("Italy", new DateTime(2016, 01, 05), new DateTime(2016, 02, 22))
+                    }
+                },
+                new User
+                {
+                    PersonalId = "3",
+                    FirstName = "Test",
+                    LastName = "User",
+                    DateOfBirth = new DateTime(1995, 4, 13),
+                    Gender = Gender.Female,
+                    VisaRecords = null
+                }
+            };
+
+            var state = new StorageState
+            {
+                CurrentId = 3,
+                Users = users
+            };
+
+            saver.SaveState(state);
         }
 
         static void WriteInConfig(int currentId, string filePath)
@@ -90,11 +151,12 @@ namespace TestConsoleApplication
                 ConfigurationManager.RefreshSection("appSettings");
             }
         }
+
         static void ShowSlaves(IEnumerable<IService> slaves)
         {
             foreach (var slave in slaves)
             {
-                ShowUsers(slave.SearchForUser(u=>true).ToList());
+                ShowUsers(slave.SearchForUser(u => true).ToList());
                 Console.WriteLine();
             }
         }
@@ -103,7 +165,8 @@ namespace TestConsoleApplication
         {
             foreach (var user in users)
             {
-                Console.WriteLine($"{user.PersonalId})\t{user.FirstName} {user.LastName}; {user.Gender}; {user.DateOfBirth}");
+                Console.WriteLine(
+                    $"{user.PersonalId})\t{user.FirstName} {user.LastName}; {user.Gender}; {user.DateOfBirth}");
                 Console.Write($"Visas: ");
 
                 if (user.VisaRecords == null)

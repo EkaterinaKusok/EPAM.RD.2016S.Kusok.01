@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6C5C9AA9-5B4B-496B-AFE7-5CE587C0B3DA}</ProjectGuid>
+    <ProjectGuid>{7F3DACF9-DC1E-4278-811C-262FDCBA53A9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UserStorage.Tests</RootNamespace>
-    <AssemblyName>UserStorage.Tests</AssemblyName>
+    <RootNamespace>Generator.Tests</RootNamespace>
+    <AssemblyName>Generator.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -50,19 +50,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="UserStorageTests.cs" />
-    <Compile Include="UserEqualsTests.cs" />
-    <Compile Include="ValidatorTests.cs" />
+    <Compile Include="IdGeneratorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UserStorage.Interfacies\UserStorage.Interfacies.csproj">
-      <Project>{8f7f8a0b-9ae1-4541-bba3-368ee0ddeabb}</Project>
-      <Name>UserStorage.Interfacies</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\UserStorage\UserStorage.csproj">
-      <Project>{cfca53c6-264d-4e8d-9a6a-ce40cc3213c4}</Project>
-      <Name>UserStorage</Name>
+    <ProjectReference Include="..\Generator\Generator.csproj">
+      <Project>{5df6f8a8-e3c7-42af-921a-b3ebffb36dec}</Project>
+      <Name>Generator</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

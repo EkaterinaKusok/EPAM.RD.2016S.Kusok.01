@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UserStorage.UserEntities;
+using UserStorage.Interfacies.Storages;
+using UserStorage.Interfacies.UserEntities;
 
 namespace UserStorage.UserStorage
 {

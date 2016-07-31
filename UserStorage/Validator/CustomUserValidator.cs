@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using UserStorage.UserEntities;
+using UserStorage.Interfacies.UserEntities;
+using UserStorage.Interfacies.Validators;
 
 namespace UserStorage.Validator
 {

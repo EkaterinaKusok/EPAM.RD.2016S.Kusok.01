@@ -1,103 +1,133 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net.Sockets;
-using System.Text;
-using System.Web.Script.Serialization;
-using UserStorage.Generator;
-using UserStorage.ServiceInfo;
-using UserStorage.StateSaver;
-using UserStorage.UserEntities;
-using UserStorage.UserStorage;
-using UserStorage.Validator;
+using System.Linq;
+using System.Threading;
+using UserStorage.Interfacies.Creators;
+using UserStorage.Interfacies.Generators;
+using UserStorage.Interfacies.Logger;
+using UserStorage.Interfacies.Network;
+using UserStorage.Interfacies.ServiceInfo;
+using UserStorage.Interfacies.Services;
+using UserStorage.Interfacies.StateSavers;
+using UserStorage.Interfacies.Storages;
+using UserStorage.Interfacies.UserEntities;
+using UserStorage.Interfacies.Validators;
 
 namespace UserStorage.Service
 {
     [Serializable]
-    public class SlaveService : MarshalByRefObject, IService
+    public class SlaveService : MarshalByRefObject, IService, IListener
     {
-        private readonly TcpListener server;
         private readonly IUserStorage userStorage;
-        public string Name { get; }
+        private readonly ILogger logger;
+        private readonly IReceiver receiver;
+        private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
         public ServiceMode Mode => ServiceMode.Slave;
-        
-        public SlaveService(IGenerator<int> idGenerator, IStateSaver saver, IUserValidator validator,
-            ConnectionInfo info)
-        {
-            userStorage = new MemoryUserStorage(idGenerator, validator, saver);
-            server = new TcpListener(info.IPAddress, info.Port);
-            server.Start();
-        }
 
-        public async void ListenForUpdates()
+        public SlaveService(IDependencyCreator creator)
         {
-            var serializer = new JavaScriptSerializer();
-            try
+            if (creator == null)
             {
-                while (true)
-                {
-                    using (TcpClient client = await server.AcceptTcpClientAsync())
-                    using (NetworkStream stream = client.GetStream())
-                    {
-                        string serializedMessage = string.Empty;
-                        byte[] data = new byte[1024];
+                throw new ArgumentNullException($"{nameof(creator)} must be not null.");
+            }
 
-                        while (stream.DataAvailable)
-                        {
-                            int i = await stream.ReadAsync(data, 0, data.Length);
-                            serializedMessage += Encoding.UTF8.GetString(data, 0, i);
-                        }
-                        ServiceMessage message = serializer.Deserialize<ServiceMessage>(serializedMessage);
-                        UpdateOnModifying(message);
-                    }
-                }
-            }
-            finally
+            var validator = creator.CreateInstance<IUserValidator>();
+            var saver = creator.CreateInstance<IStateSaver>();
+            var generator = creator.CreateInstance<IGenerator<int> >();
+            userStorage = creator.CreateInstance<IUserStorage>(generator, validator, saver);
+            if (userStorage == null)
             {
-                server.Stop();
+                throw new InvalidOperationException($"Unable to create {nameof(userStorage)}.");
             }
-        }
 
-        private void UpdateOnModifying(ServiceMessage message)
-        {
-            switch (message.Operation)
+            logger = creator.CreateInstance<ILogger>();
+            if (logger == null)
             {
-                case ServiceOperation.Add:
-                    userStorage.Add(message.User);
-                    break;
-                case ServiceOperation.Remove:
-                    userStorage.Delete(message.User.Id);
-                    break;
+                throw new InvalidOperationException($"Unable to create {nameof(logger)}.");
             }
+            
+            receiver = creator.CreateInstance<IReceiver>();
+            if (receiver == null)
+            {
+                logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\t{nameof(receiver)} is null.");
+                throw new InvalidOperationException($"Unable to create {nameof(receiver)}.");
+            }
+
+            receiver.Updating += UpdateOnModifying;
+            logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tslave service created.");
         }
         
+
         public int Add(User user)
         {
-            server.Stop();
-            throw new NotSupportedException();
+            receiver.StopReceiver();
+            logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\taddition attempt; access denied.");
+            throw new NotSupportedException("Slave cannot write to storage.");
+        }
+
+        public void Delete(int personalId)
+        {
+            receiver.StopReceiver();
+            logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\tremoving attempt; access denied.");
+            throw new NotSupportedException("Slave cannot delete from storage.");
         }
 
         public IEnumerable<User> SearchForUser(params Func<User, bool>[] predicates)
         {
-            return this.userStorage.SearchForUser(predicates);
+            readerWriterLock.EnterReadLock();
+            try
+            {
+                var foundUsers = this.userStorage.SearchForUser(predicates);
+                logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tusers search ({foundUsers.Count()} found).");
+                return foundUsers;
+            }
+            finally
+            {
+                readerWriterLock.ExitReadLock();
+            }
         }
 
-        public void Delete(int id)
+        public void ListenForUpdates()
         {
-            server.Stop();
-            throw new NotSupportedException();
+            receiver.StartReceivingMessages();
+        }
+
+        private void UpdateOnModifying(object sender, UserEventArgs eventArgs)
+        {
+            readerWriterLock.EnterWriteLock();
+            try
+            {
+                switch (eventArgs.Operation)
+                {
+                    case ServiceOperation.Add:
+                        userStorage.Add(eventArgs.User);
+                        logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user added.");
+                        break;
+                    case ServiceOperation.Remove:
+                        userStorage.Delete(eventArgs.User.Id);
+                        logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\treceived user removed.");
+                        break;
+                }
+            }
+            finally
+            {
+                readerWriterLock.ExitWriteLock();
+            }
         }
 
         public void Save()
         {
-            server.Stop();
-            throw new NotSupportedException();
+            receiver.StopReceiver();
+            logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\taddition attempt; access denied.");
+            throw new NotSupportedException("Slave cannot save state.");
         }
 
         public void Load()
         {
-            server.Stop();
-            throw new NotSupportedException();
+            receiver.StopReceiver();
+            logger.Log(TraceEventType.Error, $"{AppDomain.CurrentDomain.FriendlyName}:\taddition attempt; access denied.");
+            throw new NotSupportedException("Slave cannot load state.");
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Configuration;
 using System.IO;
 using System.Xml.Serialization;
+using UserStorage.Interfacies.StateSavers;
+using UserStorage.Interfacies.ServiceInfo;
 
 namespace UserStorage.StateSaver
 {
@@ -17,20 +19,20 @@ namespace UserStorage.StateSaver
             _fileName = fileName;
         }
 
-        public UserState LoadState()
+        public StorageState LoadState()
         {
-            XmlSerializer formatter = new XmlSerializer(typeof (UserState));
-            UserState state = new UserState();
+            XmlSerializer formatter = new XmlSerializer(typeof (StorageState));
+            StorageState state = new StorageState();
             using (Stream s = new FileStream(_fileName, FileMode.Open))
             {
-                state = (UserState) formatter.Deserialize(s);
+                state = (StorageState) formatter.Deserialize(s);
             }
             return state;
         }
 
-        public void SaveState( UserState state)
+        public void SaveState(StorageState state)
         {
-            XmlSerializer formatter = new XmlSerializer(typeof (UserState));
+            XmlSerializer formatter = new XmlSerializer(typeof (StorageState));
             using (FileStream s = File.Create(_fileName))
             {
                 formatter.Serialize(s, state);
