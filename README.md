@@ -56,3 +56,49 @@ o Delete an user: void Delete(...)
 * All configuration is stored in App.config: a number of services, their types.
 
 * Create a custom section in App.config file, so the number of instances and their role can be changed there. 
+
+####Modify project (Day 4):
+* Create each instance of the user storage service in new application domain, and add support for communication between all .
+
+####Project (Day 5):
+
+o Add functionality that allows master send notifications to slaves via network.
+
+* You will need a new message class that will contain all the data related to event: Add or Delete, User data or id. Make it serializable.
+
+* It's okay if you will establish connection between master and slave when the master node starts.
+
+* Implementations is simpler when master establish connection to slaves, and then maintain it. This implementations assumes that slaves are passive listeners.
+
+* Use NetworkStream to create a channel, and you can use Socket class or TcpListener/TcpClient. (Heorhi said that TcpListener and TcpClient have lack of functionality, and it's simpler to use Socket class. You can consult him if you have any questions).
+
+* It's possible to start slaves first, and then start master to avoid conflicts when master is running and there are no slaves.
+
+* Store all configuration informations about hosts/ports in custom section in App.config.
+
+o Protect your user services from concurrent calls.
+
+* For master – calling Add/Delete, Add/Search, Delete/Search simultaneously.
+
+* For slaves – calling Search and updating an user repository simultaneously.
+
+* Check how your code works by making calls to master service in several threads.
+
+o Make your application run in several threads, one thread per user service. For example:
+
+* T1 is making calls to master service: Add, Delete, Search in cycle with Sleep().
+
+* T2 is making calls to slave #1: Search in cycle with Sleep().
+
+* T3 is making calls to slave #2: Search in cycle with Sleep().
+
+* Changes (Add/Delete) on master node should lead to changes in Search output on slaves. 
+
+#### Day 8:
+
+* Add simple WCF service as a front-end service for master and slaves. o https://msdn.microsoft.com/en-us/library/ms731758(v=vs.110).aspx
+
+* Optimize search operation, because of a huge amount of elements search has O(n), and because of locking collection this may lead to delays.
+
+* Advanced: implement network functionality in asynchronous style (Sockets.Begin...() methods).
+
