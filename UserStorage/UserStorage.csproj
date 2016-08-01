@@ -47,7 +47,6 @@
     <Compile Include="Network\Sender.cs" />
     <Compile Include="Service\MasterService.cs" />
     <Compile Include="Service\SlaveService.cs" />
-    <Compile Include="UserStorage\UserStorageLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserStorage\MemoryUserStorage.cs" />
     <Compile Include="Validator\CustomUserValidator.cs" />

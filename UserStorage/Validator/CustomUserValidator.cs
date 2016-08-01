@@ -15,8 +15,8 @@ namespace UserStorage.Validator
         private string[] validCountries = new[]
         {
             "Argentina", "Australia", "Austria", "Belarus", "Bulgaria", "China", "Egypt", "France", "Italy",
-            "Japan", "Lithuania", "", "Malta", "Maldives", "New Zealand", "Norway", "Russia", "Spain ", "Turkey",
-            "United Kingdom", "Switzerland", "Sweden","Ukraine"
+            "Japan", "Lithuania", "Malta", "Maldives", "New Zealand", "Norway", "Russia", "Spain ", "Turkey",
+            "United Kingdom", "Switzerland", "Sweden", "Ukraine"
         };
 
         public bool FirstNameIsValid(string firstName)
@@ -31,25 +31,29 @@ namespace UserStorage.Validator
 
         public bool PersonalIdIsValid(string personalId)
         {
-            return personalIdRegex.IsMatch(personalId) ;
+            return personalIdRegex.IsMatch(personalId);
         }
 
         public bool DateOfBirthIsValid(DateTime dateOfBirth)
         {
-            return (dateOfBirth < DateTime.Now && DateTime.Now.Year - dateOfBirth.Year < 130);
+            return dateOfBirth < DateTime.Now && DateTime.Now.Year - dateOfBirth.Year < 130;
         }
 
         public bool VisaRecordsAreValid(VisaRecord[] visaRecords)
         {
             bool result = true;
-            foreach (var visa in visaRecords)
+            if (visaRecords != null)
             {
-                if (!VisaRecordIsValid(visa))
+                foreach (var visa in visaRecords)
                 {
-                    result = false;
-                    break;
+                    if (!VisaRecordIsValid(visa))
+                    {
+                        result = false;
+                        break;
+                    }
                 }
             }
+
             return result;
         }
 
@@ -57,6 +61,5 @@ namespace UserStorage.Validator
         {
             return (visa.StartDate < visa.EndDate) && validCountries.Contains(visa.Country);
         }
-
     }
 }

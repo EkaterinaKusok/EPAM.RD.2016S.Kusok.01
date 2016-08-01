@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using Configurator;
+using UserStorage.Interfacies.ServiceInfo;
 using UserStorage.Interfacies.Services;
 using UserStorage.Interfacies.UserEntities;
-using UserStorage.Service;
 using UserStorage.StateSaver;
-using UserStorage.Interfacies.ServiceInfo;
 
 namespace TestConsoleApplication
 {
@@ -19,11 +17,15 @@ namespace TestConsoleApplication
 
         private static void Main(string[] args)
         {
-            SaveExample();
+            List<User> users = InitialUsers();
 
             List<Thread> threads = new List<Thread>();
             var configurator = new ServiceConfigurator();
             configurator.Start();
+            foreach (var user in users)
+            {
+                configurator.MasterService.Add(user);
+            }
 
             threads.Add(new Thread(() => WorkMaster(configurator.MasterService)));
             threads.AddRange(configurator.SlaveServices.Select(slave => new Thread(() => WorkSlave(slave))));
@@ -52,9 +54,17 @@ namespace TestConsoleApplication
         {
             while (!endWork)
             {
-                master.Add(new User {FirstName = "Test", LastName = "LTest"});
-                User firstUser = master.SearchForUser(new Func<User, bool>[] {u => true}).FirstOrDefault();
-                master.Delete(firstUser.Id);
+                master.Add(new User
+                {
+                    FirstName = "Test",
+                    LastName = "LTest"
+                });
+                var users = master.SearchForUser(u => true);
+                if (users != null || users.Count != 0)
+                {
+                    master.Delete(users[0].Id);
+                }
+
                 Thread.Sleep(1000);
             }
         }
@@ -63,12 +73,13 @@ namespace TestConsoleApplication
         {
             while (!endWork)
             {
-                slave.SearchForUser(new Func<User, bool>[] {u => u.FirstName == "Test"});
+                // ShowUsers(slave.SearchForUser(u => true).ToList());
+                slave.SearchForUser(u => u.FirstName == "Test");
                 Thread.Sleep(1000);
             }
         }
 
-        private static void SaveExample()
+        private static List<User> InitialUsers()
         {
             var saver = new XmlStateSaver();
 
@@ -76,6 +87,7 @@ namespace TestConsoleApplication
             {
                 new User
                 {
+                    Id = 1,
                     PersonalId = "1",
                     FirstName = "John",
                     LastName = "Doe",
@@ -89,10 +101,11 @@ namespace TestConsoleApplication
                 },
                 new User
                 {
+                    Id = 2,
                     PersonalId = "2",
                     FirstName = "Unnamed",
                     LastName = "Person",
-                    DateOfBirth = new DateTime(1995, 7, 3),
+                    DateOfBirth = new DateTime(1989, 7, 3),
                     Gender = Gender.Male,
                     VisaRecords = new VisaRecord[]
                     {
@@ -101,10 +114,11 @@ namespace TestConsoleApplication
                 },
                 new User
                 {
+                    Id = 3,
                     PersonalId = "3",
                     FirstName = "Test",
                     LastName = "User",
-                    DateOfBirth = new DateTime(1995, 4, 13),
+                    DateOfBirth = new DateTime(1905, 4, 13),
                     Gender = Gender.Female,
                     VisaRecords = null
                 }
@@ -112,25 +126,29 @@ namespace TestConsoleApplication
 
             var state = new StorageState
             {
-                CurrentId = 3,
+                CurrentId = 5,
                 Users = users
             };
 
-            saver.SaveState(state);
+            // saver.SaveState(state);
+            return users;
         }
 
-        static void WriteInConfig(int currentId, string filePath)
+        private static void WriteInConfig(int currentId, string filePath)
         {
             if (!ConfigurationManager.AppSettings.AllKeys.Contains("CurrentId"))
             {
                 // открываем текущий конфиг специальным обьектом
                 System.Configuration.Configuration currentConfig =
                     ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                
                 // добавляем позицию в раздел AppSettings
                 currentConfig.AppSettings.Settings.Add("CurrentId", currentId.ToString());
-                //сохраняем
+                
+                // сохраняем
                 currentConfig.Save(ConfigurationSaveMode.Full);
-                //принудительно перезагружаем соотвествующую секцию
+                
+                // принудительно перезагружаем соотвествующую секцию
                 ConfigurationManager.RefreshSection("appSettings");
             }
             else if (!ConfigurationManager.AppSettings.AllKeys.Contains("FilePath"))
@@ -152,7 +170,7 @@ namespace TestConsoleApplication
             }
         }
 
-        static void ShowSlaves(IEnumerable<IService> slaves)
+        private static void ShowSlaves(IEnumerable<IService> slaves)
         {
             foreach (var slave in slaves)
             {
@@ -161,26 +179,20 @@ namespace TestConsoleApplication
             }
         }
 
-        static void ShowUsers(IEnumerable<User> users)
+        private static void ShowUsers(IEnumerable<User> users)
         {
+            if (users == null || users.Count() == 0)
+            {
+                Console.WriteLine("No users.");
+                return;
+            }
+
             foreach (var user in users)
             {
-                Console.WriteLine(
-                    $"{user.PersonalId})\t{user.FirstName} {user.LastName}; {user.Gender}; {user.DateOfBirth}");
-                Console.Write($"Visas: ");
-
-                if (user.VisaRecords == null)
-                {
-                    Console.WriteLine("no visas");
-                    return;
-                }
-
-                foreach (var visa in user.VisaRecords)
-                {
-                    Console.Write($"{visa.Country}  ");
-                }
-                Console.WriteLine();
+                Console.Write(user.FirstName + " " + user.LastName + "; ");
             }
+
+            Console.WriteLine();
         }
     }
 }

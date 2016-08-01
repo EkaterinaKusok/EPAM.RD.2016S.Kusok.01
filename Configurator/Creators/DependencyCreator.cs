@@ -4,6 +4,7 @@ using System.Linq;
 using UserStorage.Interfacies.Creators;
 using UserStorage.Interfacies.Generators;
 using UserStorage.Interfacies.StateSavers;
+using UserStorage.Interfacies.Storages;
 using UserStorage.Interfacies.Validators;
 
 namespace Configurator.Creators
@@ -29,13 +30,8 @@ namespace Configurator.Creators
             return Create<T>(info);
         }
 
+        // it's temporary fix
         public T CreateInstance<T>(params object[] parameters)
-        {
-            throw new NotImplementedException();
-        }
-
-        //it's temporary fix
-        public IUserStorage CreateInstance<IUserStorage>(IGenerator<int> generator, IUserValidator validator, IStateSaver saver)
         {
             if (typesSingle == null)
             {
@@ -47,7 +43,15 @@ namespace Configurator.Creators
             {
                 throw new NullReferenceException($"Type '{type.Name}' not found.");
             }
-            return (IUserStorage)Activator.CreateInstance(type, generator, validator, saver);
+
+            if (parameters.Length == 3)
+            {
+                return (T)Activator.CreateInstance(type, (IGenerator<int>)parameters[0], (IUserValidator)parameters[1], (IStateSaver)parameters[2]);
+            }
+            else
+            {
+                throw new ArgumentException();
+            }
         }
 
         private T Create<T>(InstanceInfo instanceInfo)

@@ -1,6 +1,6 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Generator;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Generator.Tests
 {
@@ -38,9 +38,8 @@ namespace Generator.Tests
         [ExpectedException(typeof(OverflowException))]
         public void GenerateNewId_IsOverflow_ReturnAnException()
         {
-
             var generator = new PrimeIdGenerator();
-            generator.GenerateNewId(Int32.MaxValue);
+            generator.GenerateNewId(int.MaxValue);
         }
     }
 }

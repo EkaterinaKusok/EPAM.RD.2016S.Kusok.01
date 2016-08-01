@@ -31,6 +31,5 @@ namespace Generator
         {
             return sequence.Current;
         }
-        
     }
 }

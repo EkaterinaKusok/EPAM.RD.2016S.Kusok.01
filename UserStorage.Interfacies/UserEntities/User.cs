@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Runtime.Serialization;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace UserStorage.Interfacies.UserEntities
 {
     [Serializable]
-    public class User : ISerializable
+    public class User : IXmlSerializable
     { 
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string PersonalId { get; set; } //PassportNumber
-        public DateTime DateOfBirth { get; set; }
-        public Gender Gender { get; set; }
-        public VisaRecord[] VisaRecords { get; set; }
-
         public User()
         {
         }
@@ -28,7 +22,20 @@ namespace UserStorage.Interfacies.UserEntities
             Gender = gender;
             VisaRecords = visaRecords;
         }
-        
+
+        public int Id { get; set; }
+
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
+
+        public string PersonalId { get; set; } // PassportNumber
+
+        public DateTime DateOfBirth { get; set; }
+
+        public Gender Gender { get; set; }
+
+        public VisaRecord[] VisaRecords { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -46,31 +53,35 @@ namespace UserStorage.Interfacies.UserEntities
             return Id.GetHashCode();
         }
 
-        
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public XmlSchema GetSchema()
         {
-            // Use the AddValue method to specify serialized values.
-            info.AddValue("Id", Id, typeof(int));
-            info.AddValue("FirstName", FirstName, typeof(string));
-            info.AddValue("LastName", LastName, typeof(string));
-            info.AddValue("PersonalId", PersonalId, typeof(string));
-            info.AddValue("DateOfBirth", DateOfBirth, typeof(DateTime));
-            info.AddValue("Gender", Gender, typeof(Gender));
-            info.AddValue("VisaRecords", VisaRecords, typeof(VisaRecord[]));
-
-        }
-        // The special constructor is used to deserialize values.
-        public User(SerializationInfo info, StreamingContext context)
-        {
-            // Reset the property value using the GetValue method.
-            Id = (int)info.GetValue("Id", typeof(int));
-            FirstName = (string)info.GetValue("FirstName", typeof(string));
-            LastName = (string)info.GetValue("LastName", typeof(string));
-            PersonalId = (string)info.GetValue("PersonalId", typeof(string));
-            DateOfBirth = (DateTime)info.GetValue("DateOfBirth", typeof(DateTime));
-            Gender = (Gender)info.GetValue("Gender", typeof(Gender));
-            VisaRecords = (VisaRecord[])info.GetValue("VisaRecords", typeof(VisaRecord[]));
+            return null;
         }
 
+        public void ReadXml(XmlReader reader)
+        {
+            reader.ReadStartElement(nameof(User));
+            Id = reader.ReadElementContentAsInt();
+            FirstName = reader.ReadElementContentAsString();
+            LastName = reader.ReadElementContentAsString();
+            PersonalId = reader.ReadElementContentAsString();
+            DateOfBirth = reader.ReadElementContentAsDateTime();
+            Gender = (Gender)reader.ReadElementContentAsInt();
+            var serializer = new XmlSerializer(typeof(VisaRecord[]));
+            VisaRecords = (VisaRecord[])serializer.Deserialize(reader);
+            reader.ReadEndElement();
+        }
+
+        public void WriteXml(XmlWriter writer)
+        {
+            writer.WriteElementString(nameof(Id), Id.ToString());
+            writer.WriteElementString(nameof(FirstName), FirstName);
+            writer.WriteElementString(nameof(LastName), LastName);
+            writer.WriteElementString(nameof(PersonalId), PersonalId);
+            writer.WriteElementString(nameof(DateOfBirth), DateOfBirth.ToString("yyyy-MM-dd"));
+            writer.WriteElementString(nameof(Gender), ((int)Gender).ToString());
+            var serializer = new XmlSerializer(typeof(VisaRecord[]));
+            serializer.Serialize(writer, VisaRecords);
+        }
     }
 }

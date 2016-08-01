@@ -20,6 +20,7 @@ namespace Configurator
     public class ServiceConfigurator : IServiceConfigurator
     {
         public IService MasterService { get; private set; }
+
         public List<IService> SlaveServices { get; private set; }
 
         public void Start()
@@ -63,7 +64,6 @@ namespace Configurator
                     slaveDependencies.Add(typeof(IGenerator<int>), new InstanceInfo(servicesSection.IdGenerator.Type));
                     slaveDependencies.Add(typeof(IStateSaver), new InstanceInfo(servicesSection.Saver.Type));
                     slaveDependencies.Add(typeof(ILogger), new InstanceInfo(servicesSection.Logger.Type));
-                    slaveDependencies.Add(typeof(ILogger), new InstanceInfo(null));
                     slaveDependencies.Add(typeof(IUserStorage), new InstanceInfo(servicesSection.UserStorage.Type));
                     slaveDependencies.Add(typeof(IReceiver), new InstanceInfo(servicesSection.Receiver.Type, connectionInfo));
 

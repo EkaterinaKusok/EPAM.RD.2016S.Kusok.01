@@ -7,8 +7,8 @@ namespace UserStorage.Interfacies.ServiceInfo
     {
         public UserEventArgs(User user, ServiceOperation operation)
         {
-            User = user;
-            Operation = operation;
+            this.User = user;
+            this.Operation = operation;
         }
 
         public User User { get; }

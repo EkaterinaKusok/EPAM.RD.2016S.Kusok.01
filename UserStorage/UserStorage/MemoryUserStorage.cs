@@ -16,15 +16,14 @@ namespace UserStorage.UserStorage
     [Serializable]
     public class MemoryUserStorage : IUserStorage
     {
-        private List<User> users;
-
         private readonly IGenerator<int> idGenerator = new PrimeIdGenerator();
         private readonly IUserValidator validator = null;
         private readonly IStateSaver saver = new XmlStateSaver();
 
+        private List<User> users = new List<User>();
+
         public MemoryUserStorage()
         {
-            users = new List<User>();
         }
 
         public MemoryUserStorage(IGenerator<int> generator, IUserValidator validator, IStateSaver saver)
@@ -32,7 +31,6 @@ namespace UserStorage.UserStorage
             this.idGenerator = generator;
             this.validator = validator;
             this.saver = saver;
-            users = new List<User>();
         }
 
         public int Add(User user)
@@ -51,46 +49,51 @@ namespace UserStorage.UserStorage
                     userIsValid = false;
                     exceptionMessage += " first name;";
                 }
+
                 if (!validator.LastNameIsValid(user.LastName))
                 {
                     userIsValid = false;
                     exceptionMessage += " last name;";
                 }
-                //if (!validator.PersonalIdIsValid(user.PersonalId))
-                //{
+
+                // if (!validator.PersonalIdIsValid(user.PersonalId))
+                // {
                 //    userIsValid = false;
                 //    exceptionMessage += " personal ID;";
-                //}
-                if (!validator.DateOfBirthIsValid(user.DateOfBirth))
-                {
-                    userIsValid = false;
-                    exceptionMessage += "date of birth;";
-                }
+                // }
+                // if (!validator.DateOfBirthIsValid(user.DateOfBirth))
+                // {
+                //    userIsValid = false;
+                //    exceptionMessage += "date of birth;";
+                // }
                 if (!validator.VisaRecordsAreValid(user.VisaRecords))
                 {
                     userIsValid = false;
                     exceptionMessage += " one of visas;";
                 }
-                if (!userIsValid)
-                    throw new UserValidationException(exceptionMessage);
-            }
-            //if (this.users.Any(u => u.Id == user.Id))
-            //{
-            //    throw new InvalidOperationException($"User with id={user.Id} already exist");
-            //}
 
+                if (!userIsValid)
+                {
+                    throw new UserValidationException(exceptionMessage);
+                }
+            }
+
+            // if (this.users.Any(u => u.Id == user.Id))
+            // {
+            //    throw new InvalidOperationException($"User with id={user.Id} already exist");
+            // }
             int newId = idGenerator.GenerateNewId();
             users.Add(new User()
             {
                 Id = newId,
                 FirstName = user.FirstName,
-                LastName = user.FirstName,
+                LastName = user.LastName,
                 DateOfBirth = user.DateOfBirth,
                 Gender = user.Gender,
                 PersonalId = user.PersonalId,
                 VisaRecords = user.VisaRecords
             });
-            return user.Id;
+            return newId;
         }
 
         public void Delete(int id)
@@ -100,6 +103,7 @@ namespace UserStorage.UserStorage
             {
                 throw new InvalidOperationException($"User with Id = {id} doesn't exist");
             }
+
             users.RemoveAll(u => u.Id == id);
         }
 
@@ -119,45 +123,29 @@ namespace UserStorage.UserStorage
             this.users = state.Users.ToList();
             this.idGenerator.SetCurrentId(state.CurrentId);
         }
-
-        //public void Delete(User user)
-        //{
-        //    var removingUser = users.SingleOrDefault(u => u.Equals(user));
-        //    if (removingUser == null)
-        //    {
-        //        throw new InvalidOperationException(string.Format("User with Id = {0} doesn't exist", user.Id));
-        //    }
-        //    users.RemoveAll(u => u.Id == user.Id);
-        //    users.RemoveAll(x => x.Equals(user));
-        //}
         
-        public IEnumerable<User> SearchForUser(params Func<User, bool>[] predicates)
+        public IList<User> SearchForUser(params Func<User, bool>[] predicates)
         {
             if (!users.Any())
-                return new User[0];
+            {
+                return new List<User>();
+            }
+
             if (predicates.Count() == 0)
-                return users.Select(u => u);
+            {
+                return users.Select(u => u).ToList();
+            }
+
             Func<User, bool> commonPredicate = predicates[0];
             if (predicates.Count() > 1)
+            {
                 foreach (var predicate in predicates)
+                {
                     commonPredicate += predicate;
-            return users.Where(commonPredicate);
+                }
+            }
+
+            return users.Where(commonPredicate).ToList();
         }
-
-        //public IEnumerable<User> GetAllUsers()
-        //{
-        //    return users.Select(u => u);
-        //}
-
-        //public void DeleteAllUsers()
-        //{
-        //    users.Clear();
-        //}
-
-        //public void SetCurrentId(int currentId)
-        //{
-        //    idGenerator.SetCurrentId(currentId);
-        //}
-
     }
 }
