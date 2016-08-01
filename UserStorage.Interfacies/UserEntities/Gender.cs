@@ -1,8 +1,11 @@
-﻿namespace UserStorage.Interfacies.UserEntities
+﻿using System.Runtime.Serialization;
+
+namespace UserStorage.Interfacies.UserEntities
 {
+    [DataContract]
     public enum Gender
     {
-        Male = 1,
-        Female
+        [EnumMember] Male = 1,
+        [EnumMember] Female
     }
 }

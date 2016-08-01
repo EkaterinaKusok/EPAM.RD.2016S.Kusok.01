@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace UserStorage.Interfacies.UserEntities
 {
+    [DataContract]
     [Serializable]
     public class User : IXmlSerializable
-    { 
+    {
         public User()
         {
         }
@@ -23,18 +25,25 @@ namespace UserStorage.Interfacies.UserEntities
             VisaRecords = visaRecords;
         }
 
+        [DataMember]
         public int Id { get; set; }
 
+        [DataMember]
         public string FirstName { get; set; }
 
+        [DataMember]
         public string LastName { get; set; }
 
+        [DataMember]
         public string PersonalId { get; set; } // PassportNumber
 
+        [DataMember]
         public DateTime DateOfBirth { get; set; }
 
+        [DataMember]
         public Gender Gender { get; set; }
 
+        [DataMember]
         public VisaRecord[] VisaRecords { get; set; }
 
         public override bool Equals(object obj)

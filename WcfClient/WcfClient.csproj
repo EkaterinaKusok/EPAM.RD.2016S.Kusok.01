@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8F7F8A0B-9AE1-4541-BBA3-368EE0DDEABB}</ProjectGuid>
+    <ProjectGuid>{91A56E1C-4EAB-4B98-AA4A-2844295BCA0B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UserStorage.Interfacies</RootNamespace>
-    <AssemblyName>UserStorage.Interfacies</AssemblyName>
+    <RootNamespace>WcfClient</RootNamespace>
+    <AssemblyName>WcfClient</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,7 +32,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,28 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Creators\IDependencyCreator.cs" />
-    <Compile Include="Generators\IGenerator.cs" />
-    <Compile Include="Logger\ILogger.cs" />
-    <Compile Include="Network\IReceiver.cs" />
-    <Compile Include="Network\ISender.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceInfo\ConnectionInfo.cs" />
-    <Compile Include="ServiceInfo\ServiceMessage.cs" />
-    <Compile Include="ServiceInfo\ServiceMode.cs" />
-    <Compile Include="ServiceInfo\ServiceOperation.cs" />
-    <Compile Include="ServiceInfo\StorageState.cs" />
-    <Compile Include="ServiceInfo\UserEventArgs.cs" />
-    <Compile Include="Services\IListener.cs" />
-    <Compile Include="Services\IService.cs" />
-    <Compile Include="StateSavers\IStateSaver.cs" />
-    <Compile Include="Storages\IUserStorage.cs" />
-    <Compile Include="UserEntities\Gender.cs" />
-    <Compile Include="UserEntities\User.cs" />
-    <Compile Include="UserEntities\VisaRecord.cs" />
-    <Compile Include="Validators\IUserValidator.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

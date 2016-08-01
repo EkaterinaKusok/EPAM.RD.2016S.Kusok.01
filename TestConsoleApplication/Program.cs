@@ -74,7 +74,7 @@ namespace TestConsoleApplication
             while (!endWork)
             {
                 // ShowUsers(slave.SearchForUser(u => true).ToList());
-                slave.SearchForUser(u => u.FirstName == "Test");
+                slave.SearchForUser(u => u.FirstName == "Unnamed");
                 Thread.Sleep(1000);
             }
         }

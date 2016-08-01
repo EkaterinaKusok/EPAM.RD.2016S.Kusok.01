@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -6,6 +7,7 @@ using System.Xml.Serialization;
 namespace UserStorage.Interfacies.UserEntities
 {
     [Serializable]
+    [DataContract]
     public struct VisaRecord : IXmlSerializable
     {
         public VisaRecord(string country, DateTime start, DateTime end)
@@ -15,10 +17,13 @@ namespace UserStorage.Interfacies.UserEntities
             EndDate = end;
         }
 
+        [DataMember]
         public string Country { get; private set; }
 
+        [DataMember]
         public DateTime StartDate { get; private set; }
 
+        [DataMember]
         public DateTime EndDate { get; private set; }
 
         public XmlSchema GetSchema()
