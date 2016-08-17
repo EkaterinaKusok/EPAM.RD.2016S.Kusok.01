@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 namespace Generator
 {
+    /// <summary>
+    /// Represents prime sequence, which generates new elements
+    /// </summary>
+    /// <seealso cref="System.Collections.Generic.IEnumerator{System.Int32}" />
     public class PrimeSequence : IEnumerator<int>
     {
         private int current;

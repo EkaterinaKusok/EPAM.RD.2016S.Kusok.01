@@ -2,9 +2,14 @@
 
 namespace Generator
 {
+    /// <summary>
+    /// Provides methods for generating prime numbers.
+    /// </summary>
     public class PrimeIdGenerator : IGenerator<int>
     {
         private readonly PrimeSequence sequence = new PrimeSequence();
+
+        #region IGenerator methods
 
         public int GenerateNewId()
         {
@@ -31,5 +36,6 @@ namespace Generator
         {
             return sequence.Current;
         }
+        #endregion
     }
 }

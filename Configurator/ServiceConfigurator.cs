@@ -17,6 +17,9 @@ using UserStorage.Interfacies.Validators;
 
 namespace Configurator
 {
+    /// <summary>
+    /// Configures services.
+    /// </summary>
     public class ServiceConfigurator : IServiceConfigurator
     {
         public IService MasterService { get; private set; }

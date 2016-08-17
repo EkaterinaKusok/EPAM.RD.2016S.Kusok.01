@@ -2,6 +2,9 @@
 
 namespace UserStorage.Interfacies.StateSavers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IStateSaver
     {
         StorageState LoadState();

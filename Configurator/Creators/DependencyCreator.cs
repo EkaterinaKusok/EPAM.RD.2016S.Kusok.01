@@ -9,16 +9,32 @@ using UserStorage.Interfacies.Validators;
 
 namespace Configurator.Creators
 {
+    /// <summary>
+    /// Represents common functionality for creating dependencies.
+    /// </summary>
+    /// <seealso cref="UserStorage.Interfacies.Creators.IDependencyCreator" />
     [Serializable]
     public class DependencyCreator : IDependencyCreator
     {
         private readonly Dictionary<Type, InstanceInfo> typesSingle;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DependencyCreator"/> class.
+        /// </summary>
+        /// <param name="typesSingle">The single types.</param>
         public DependencyCreator(Dictionary<Type, InstanceInfo> typesSingle)
         {
             this.typesSingle = typesSingle;
         }
 
+        /// <summary>
+        /// Creates the instance of type T.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>
+        /// The instance of type T.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Creator hasn't got types.</exception>
         public T CreateInstance<T>()
         {
             if (typesSingle == null)
@@ -31,6 +47,17 @@ namespace Configurator.Creators
         }
 
         // it's temporary fix
+        /// <summary>
+        /// Creates the instance of type T.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="parameters">The parameters for creating.</param>
+        /// <returns>
+        /// The instance of type T.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Creator hasn't got types.</exception>
+        /// <exception cref="NullReferenceException">Type '{type.Name}'</exception>
+        /// <exception cref="ArgumentException"></exception>
         public T CreateInstance<T>(params object[] parameters)
         {
             if (typesSingle == null)
@@ -54,6 +81,15 @@ namespace Configurator.Creators
             }
         }
 
+        /// <summary>
+        /// Creates the specified instance information.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="instanceInfo">The instance information.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">{nameof(instanceInfo)}</exception>
+        /// <exception cref="NullReferenceException">Type '{instanceInfo.TypeName}'</exception>
+        /// <exception cref="ArgumentException">'{instanceInfo.TypeName}' doesn't implement interface '{typeof(T).Name}'.</exception>
         private T Create<T>(InstanceInfo instanceInfo)
         {
             if (instanceInfo == null)
