@@ -16,6 +16,11 @@ using UserStorage.Interfacies.Validators;
 
 namespace UserStorage.Service
 {
+    /// <summary>
+    /// Implements functionality for working with users as master process.
+    /// </summary>
+    /// <seealso cref="System.MarshalByRefObject" />
+    /// <seealso cref="UserStorage.Interfacies.Services.IService" />
     [Serializable]
     public class MasterService : MarshalByRefObject, IService
     {
@@ -27,6 +32,18 @@ namespace UserStorage.Service
 
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MasterService"/> class.
+        /// </summary>
+        /// <param name="creator">The dependency creator.</param>
+        /// <exception cref="ArgumentNullException">{nameof(creator)}</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Unable to create {nameof(this.userStorage)}.
+        /// or
+        /// Unable to create {nameof(this.logger)}.
+        /// or
+        /// Unable to create {nameof(this.sender)}.
+        /// </exception>
         public MasterService(IDependencyCreator creator)
         {
             if (creator == null)
@@ -60,8 +77,16 @@ namespace UserStorage.Service
             this.logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tmaster service created.");
         }
 
+        /// <summary>
+        /// Gets the service mode.
+        /// </summary>
         public ServiceMode Mode => ServiceMode.Master;
 
+        /// <summary>
+        /// Adds the specified user.
+        /// </summary>
+        /// <param name="user">User instance.</param>
+        /// <returns></returns>
         public int Add(User user)
         {
             this.readerWriterLock.EnterWriteLock();
@@ -79,6 +104,10 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Deletes user from storage.
+        /// </summary>
+        /// <param name="id">User identifier.</param>
         public void Delete(int id)
         {
             this.readerWriterLock.EnterWriteLock();
@@ -101,6 +130,11 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Performs a search for user using specified predicates.
+        /// </summary>
+        /// <param name="predicates">Criterias for search.</param>
+        /// <returns></returns>
         public IList<User> SearchForUser(params Func<User, bool>[] predicates)
         {
             this.readerWriterLock.EnterReadLock();
@@ -116,6 +150,9 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Loads storage state.
+        /// </summary>
         public void Load()
         {
             this.readerWriterLock.EnterWriteLock();
@@ -136,6 +173,9 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Saves storage state.
+        /// </summary>
         public void Save()
         {
             this.readerWriterLock.EnterWriteLock();

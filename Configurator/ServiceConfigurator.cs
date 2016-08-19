@@ -22,10 +22,21 @@ namespace Configurator
     /// </summary>
     public class ServiceConfigurator : IServiceConfigurator
     {
+        /// <summary>
+        /// Gets the master service.
+        /// </summary>
         public IService MasterService { get; private set; }
 
+        /// <summary>
+        /// Gets the list of slave services.
+        /// </summary>
         public List<IService> SlaveServices { get; private set; }
 
+        /// <summary>
+        /// Starts this instance of service configurator.
+        /// </summary>
+        /// <exception cref="NullReferenceException">Unable to read section from config.</exception>
+        /// <exception cref="ConfigurationErrorsException">Count of masters must be one.</exception>
         public void Start()
         {
             StartupServicesConfigSection servicesSection = (StartupServicesConfigSection)ConfigurationManager.GetSection("StartupServices");
@@ -89,6 +100,9 @@ namespace Configurator
             MasterService?.Load();
         }
 
+        /// <summary>
+        /// Ends this instance of service configurator.
+        /// </summary>
         public void End()
         {
             MasterService?.Save();

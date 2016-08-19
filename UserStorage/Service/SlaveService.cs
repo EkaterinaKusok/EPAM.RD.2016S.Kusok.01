@@ -16,6 +16,12 @@ using UserStorage.Interfacies.Validators;
 
 namespace UserStorage.Service
 {
+    /// <summary>
+    /// Implements functionality for working with users as slave process.
+    /// </summary>
+    /// <seealso cref="System.MarshalByRefObject" />
+    /// <seealso cref="UserStorage.Interfacies.Services.IService" />
+    /// <seealso cref="UserStorage.Interfacies.Services.IListener" />
     [Serializable]
     public class SlaveService : MarshalByRefObject, IService, IListener
     {
@@ -24,6 +30,18 @@ namespace UserStorage.Service
         private readonly IReceiver receiver;
         private readonly ReaderWriterLockSlim readerWriterLock = new ReaderWriterLockSlim();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SlaveService"/> class.
+        /// </summary>
+        /// <param name="creator">The creator.</param>
+        /// <exception cref="ArgumentNullException">{nameof(creator)}</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Unable to create {nameof(this.userStorage)}.
+        /// or
+        /// Unable to create {nameof(this.logger)}.
+        /// or
+        /// Unable to create {nameof(this.receiver)}.
+        /// </exception>
         public SlaveService(IDependencyCreator creator)
         {
             if (creator == null)
@@ -57,8 +75,17 @@ namespace UserStorage.Service
             this.logger.Log(TraceEventType.Information, $"{AppDomain.CurrentDomain.FriendlyName}:\tslave service created.");
         }
 
+        /// <summary>
+        /// Gets the service mode.
+        /// </summary>
         public ServiceMode Mode => ServiceMode.Slave;
 
+        /// <summary>
+        /// Adds the specified user.
+        /// </summary>
+        /// <param name="user">User instance.</param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException">Slave cannot write to storage.</exception>
         public int Add(User user)
         {
             this.receiver.StopReceiver();
@@ -66,6 +93,11 @@ namespace UserStorage.Service
             throw new NotSupportedException("Slave cannot write to storage.");
         }
 
+        /// <summary>
+        /// Deletes the specified personal identifier.
+        /// </summary>
+        /// <param name="personalId">The personal identifier.</param>
+        /// <exception cref="NotSupportedException">Slave cannot delete from storage.</exception>
         public void Delete(int personalId)
         {
             this.receiver.StopReceiver();
@@ -73,6 +105,11 @@ namespace UserStorage.Service
             throw new NotSupportedException("Slave cannot delete from storage.");
         }
 
+        /// <summary>
+        /// Performs a search for user using specified predicates.
+        /// </summary>
+        /// <param name="predicates">Criterias for search.</param>
+        /// <returns></returns>
         public IList<User> SearchForUser(params Func<User, bool>[] predicates)
         {
             this.readerWriterLock.EnterReadLock();
@@ -88,11 +125,18 @@ namespace UserStorage.Service
             }
         }
 
+        /// <summary>
+        /// Listens for updates.
+        /// </summary>
         public void ListenForUpdates()
         {
             this.receiver.StartReceivingMessages();
         }
-        
+
+        /// <summary>
+        /// Saves storage state.
+        /// </summary>
+        /// <exception cref="NotSupportedException">Slave cannot save state.</exception>
         public void Save()
         {
             this.receiver.StopReceiver();
@@ -100,6 +144,10 @@ namespace UserStorage.Service
             throw new NotSupportedException("Slave cannot save state.");
         }
 
+        /// <summary>
+        /// Loads storage state.
+        /// </summary>
+        /// <exception cref="NotSupportedException">Slave cannot load state.</exception>
         public void Load()
         {
             this.receiver.StopReceiver();

@@ -118,7 +118,7 @@ namespace WcfServiceLibrary.WcfConfigurator
             if (type.GetInterface(typeof(IService).Name) == null ||
                 type.GetConstructor(new[] { typeof(IDependencyCreator) }) == null)
             {
-                throw new ArgumentException($"Unable to create service of type '{serviceType}' implementing interface '{nameof(IUserService)}'.");
+                throw new ArgumentException($"Unable to create service of type '{serviceType}'.");
             }
 
             string domainName = GetDomainNameFromHostAddress(hostAddress);

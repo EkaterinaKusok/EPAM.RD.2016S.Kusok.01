@@ -13,6 +13,10 @@ using UserStorage.Validator;
 
 namespace UserStorage.UserStorage
 {
+    /// <summary>
+    /// Implements common functionality for accessing user storage.
+    /// </summary>
+    /// <seealso cref="UserStorage.Interfacies.Storages.IUserStorage" />
     [Serializable]
     public class MemoryUserStorage : IUserStorage
     {
@@ -22,10 +26,19 @@ namespace UserStorage.UserStorage
 
         private List<User> users = new List<User>();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryUserStorage"/> class.
+        /// </summary>
         public MemoryUserStorage()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryUserStorage"/> class.
+        /// </summary>
+        /// <param name="generator">The generator.</param>
+        /// <param name="validator">The validator.</param>
+        /// <param name="saver">The saver.</param>
         public MemoryUserStorage(IGenerator<int> generator, IUserValidator validator, IStateSaver saver)
         {
             this.idGenerator = generator;
@@ -33,6 +46,13 @@ namespace UserStorage.UserStorage
             this.saver = saver;
         }
 
+        /// <summary>
+        /// Adds the specified user.
+        /// </summary>
+        /// <param name="user">User instance.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="UserValidationException"></exception>
         public int Add(User user)
         {
             if ((object)user == null)
@@ -96,6 +116,11 @@ namespace UserStorage.UserStorage
             return newId;
         }
 
+        /// <summary>
+        /// Deletes user from storage.
+        /// </summary>
+        /// <param name="id">User identifier.</param>
+        /// <exception cref="InvalidOperationException">User with Id = {id}</exception>
         public void Delete(int id)
         {
             var user = users.SingleOrDefault(u => u.Id == id);
@@ -107,6 +132,9 @@ namespace UserStorage.UserStorage
             users.RemoveAll(u => u.Id == id);
         }
 
+        /// <summary>
+        /// Saves storage state.
+        /// </summary>
         public void Save()
         {
             var state = new StorageState()
@@ -117,13 +145,21 @@ namespace UserStorage.UserStorage
             this.saver.SaveState(state);
         }
 
+        /// <summary>
+        /// Loads storage state.
+        /// </summary>
         public void Load()
         {
             var state = this.saver.LoadState();
             this.users = state.Users.ToList();
             this.idGenerator.SetCurrentId(state.CurrentId);
         }
-        
+
+        /// <summary>
+        /// Performs a search for user using specified predicates.
+        /// </summary>
+        /// <param name="predicates">Criterias for search.</param>
+        /// <returns></returns>
         public IList<User> SearchForUser(params Func<User, bool>[] predicates)
         {
             if (!users.Any())
@@ -145,7 +181,7 @@ namespace UserStorage.UserStorage
                 }
             }
 
-            return users.Where(commonPredicate).ToList();
+            return users.AsParallel().Where(commonPredicate).ToList();
         }
     }
 }

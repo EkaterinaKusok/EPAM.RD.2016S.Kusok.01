@@ -7,18 +7,32 @@ using UserStorage.Interfacies.ServiceInfo;
 
 namespace UserStorage.Network
 {
+    /// <summary>
+    /// Implements functionality for working as receiver.
+    /// </summary>
     public class Receiver : IReceiver
     {
         private readonly TcpListener server;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Receiver"/> class.
+        /// </summary>
+        /// <param name="info">The information.</param>
         public Receiver(ConnectionInfo info)
         {
             server = new TcpListener(info.IPAddress, info.Port);
             server.Start();
         }
 
+        /// <summary>
+        /// Occurs when [updating].
+        /// </summary>
         public event EventHandler<UserEventArgs> Updating = delegate { };
 
+        /// <summary>
+        /// Starts the receiving messages.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Unable to deserialize request.</exception>
         public async void StartReceivingMessages()
         {
             var serializer = new JavaScriptSerializer();
@@ -58,6 +72,9 @@ namespace UserStorage.Network
             }
         }
 
+        /// <summary>
+        /// Stops the receiver.
+        /// </summary>
         public void StopReceiver()
         {
             server.Stop();

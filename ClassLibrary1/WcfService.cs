@@ -21,6 +21,8 @@ namespace WcfServiceLibrary
             this.service = service;
         }
 
+        public string Name { get; set; }
+
         public int Add(User user)
         {
             return this.service.Add(user);
